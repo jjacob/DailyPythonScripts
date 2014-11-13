@@ -19,10 +19,14 @@ def calculate_xsection(inputs, luminosity, efficiency=1.):
     '''
     result = []
     add_result = result.append
+    print "calculate_xsection: inputs = ", inputs
+    
     for value, error in inputs:
         xsection = value / luminosity / efficiency
         xsection_error = error / luminosity / efficiency
-        add_result((xsection, xsection_error))        
+        add_result((xsection, xsection_error))
+        print "calculate_xsection: value = ", value, ". result = ", result
+    print "calculate_xsection: result = ", result              
     return result
 
 def calculate_normalised_xsection(inputs, bin_widths, normalise_to_one=False):

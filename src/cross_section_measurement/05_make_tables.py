@@ -9,11 +9,14 @@ from tools.file_utilities import read_data_from_JSON, make_folder_if_not_exists
 from lib import read_fit_results, read_fit_input
 import math
 
-def read_xsection_measurement_results_with_errors(channel):
+def read_xsection_measurement_results_with_errors(channel, category):
     global path_to_JSON, variable, k_values, met_type
-    category = 'central'
-
-    file_template = path_to_JSON + '/' + variable +  '/xsection_measurement_results/' + channel + '/kv' + str(k_values[channel]) + '/' + category + '/normalised_xsection_' + met_type + '.txt' 
+    
+    normalised_xsection_measured_unfolded = {}
+    normalised_xsection_measured_errors = {}
+    normalised_xsection_unfolded_errors = {}
+    
+    file_template = path_to_JSON + '/' + variable +  '/xsection_measurement_results/' + channel + '/kv' + str(k_values[channel]) + '/' + category + '/normalised_xsection_' + met_type + '.txt'
     if channel == 'combined':
         file_template = file_template.replace('kv' + str(k_values[channel]), '')
 
@@ -23,58 +26,49 @@ def read_xsection_measurement_results_with_errors(channel):
     normalised_xsection_measured_unfolded = {'measured':normalised_xsection_unfolded['TTJet_measured'],
                                             'unfolded':normalised_xsection_unfolded['TTJet_unfolded']}
     
-    file_name = file_template.replace('.txt', '_with_errors.txt')
-    normalised_xsection_unfolded_with_errors = read_data_from_JSON( file_name )
-
-    file_name = file_template.replace('.txt', '_ttbar_generator_errors.txt')
-    normalised_xsection_ttbar_generator_errors = read_data_from_JSON( file_name )
-
-    file_name = file_template.replace('.txt', '_MET_errors.txt')
-    normalised_xsection_MET_errors = read_data_from_JSON( file_name )
-
-    file_name = file_template.replace('.txt', '_topMass_errors.txt')
-    normalised_xsection_topMass_errors = read_data_from_JSON( file_name )
-
-    file_name = file_template.replace('.txt', '_kValue_errors.txt')
-    normalised_xsection_kValue_errors = read_data_from_JSON( file_name )
-
-    file_name = file_template.replace('.txt', '_PDF_errors.txt')
-    normalised_xsection_PDF_errors = read_data_from_JSON( file_name )
-
-    file_name = file_template.replace('.txt', '_other_errors.txt')
-    normalised_xsection_other_errors = read_data_from_JSON( file_name )
-
-    file_name = file_template.replace('.txt', '_new_errors.txt')
-    normalised_xsection_new_errors = read_data_from_JSON( file_name )
+    if category == 'central':
+        file_name = file_template.replace('.txt', '_with_errors.txt')
+        normalised_xsection_unfolded_with_errors = read_data_from_JSON( file_name )
     
-    normalised_xsection_measured_unfolded.update({'measured_with_systematics':normalised_xsection_unfolded_with_errors['TTJet_measured'],
-                                                'unfolded_with_systematics':normalised_xsection_unfolded_with_errors['TTJet_unfolded']})
+        file_name = file_template.replace('.txt', '_ttbar_generator_errors.txt')
+        normalised_xsection_ttbar_generator_errors = read_data_from_JSON( file_name )
     
-    normalised_xsection_measured_errors = normalised_xsection_ttbar_generator_errors['TTJet_measured']
-    normalised_xsection_measured_errors.update(normalised_xsection_PDF_errors['TTJet_measured'])
-    normalised_xsection_measured_errors.update(normalised_xsection_MET_errors['TTJet_measured'])
-    normalised_xsection_measured_errors.update(normalised_xsection_topMass_errors['TTJet_measured'])
-    normalised_xsection_measured_errors.update(normalised_xsection_kValue_errors['TTJet_measured'])
-    normalised_xsection_measured_errors.update(normalised_xsection_other_errors['TTJet_measured'])
-    normalised_xsection_measured_errors.update(normalised_xsection_new_errors['TTJet_measured'])
-
-    normalised_xsection_unfolded_errors = normalised_xsection_ttbar_generator_errors['TTJet_unfolded']
-    normalised_xsection_unfolded_errors.update(normalised_xsection_PDF_errors['TTJet_unfolded'])
-    normalised_xsection_unfolded_errors.update(normalised_xsection_MET_errors['TTJet_unfolded'])
-    normalised_xsection_unfolded_errors.update(normalised_xsection_topMass_errors['TTJet_unfolded'])
-    normalised_xsection_unfolded_errors.update(normalised_xsection_kValue_errors['TTJet_unfolded'])
-    normalised_xsection_unfolded_errors.update(normalised_xsection_other_errors['TTJet_unfolded'])
-    normalised_xsection_unfolded_errors.update(normalised_xsection_new_errors['TTJet_unfolded'])
-
+        file_name = file_template.replace('.txt', '_MET_errors.txt')
+        normalised_xsection_MET_errors = read_data_from_JSON( file_name )
+    
+        file_name = file_template.replace('.txt', '_PDF_errors.txt')
+        normalised_xsection_PDF_errors = read_data_from_JSON( file_name )
+    
+        file_name = file_template.replace('.txt', '_other_errors.txt')
+        normalised_xsection_other_errors = read_data_from_JSON( file_name )
+    
+        file_name = file_template.replace('.txt', '_new_errors.txt')
+        normalised_xsection_new_errors = read_data_from_JSON( file_name )
+        
+        normalised_xsection_measured_unfolded.update({'measured_with_systematics':normalised_xsection_unfolded_with_errors['TTJet_measured'],
+                                                    'unfolded_with_systematics':normalised_xsection_unfolded_with_errors['TTJet_unfolded']})
+    
+        normalised_xsection_measured_errors = normalised_xsection_ttbar_generator_errors['TTJet_measured']
+        normalised_xsection_measured_errors.update(normalised_xsection_PDF_errors['TTJet_measured'])
+        normalised_xsection_measured_errors.update(normalised_xsection_MET_errors['TTJet_measured'])
+        normalised_xsection_measured_errors.update(normalised_xsection_other_errors['TTJet_measured'])
+        normalised_xsection_measured_errors.update(normalised_xsection_new_errors['TTJet_measured'])
+    
+        normalised_xsection_unfolded_errors = normalised_xsection_ttbar_generator_errors['TTJet_unfolded']
+        normalised_xsection_unfolded_errors.update(normalised_xsection_PDF_errors['TTJet_unfolded'])
+        normalised_xsection_unfolded_errors.update(normalised_xsection_MET_errors['TTJet_unfolded'])
+        normalised_xsection_unfolded_errors.update(normalised_xsection_other_errors['TTJet_unfolded'])
+        normalised_xsection_unfolded_errors.update(normalised_xsection_new_errors['TTJet_unfolded'])
+    
     return normalised_xsection_measured_unfolded, normalised_xsection_measured_errors, normalised_xsection_unfolded_errors
 
-def print_fit_results_table(initial_values, fit_results, channel, toFile = True):
+def print_fit_results_table(initial_values, fit_results, channel, category, toFile = True):
     global output_folder, variable, met_type
     bins = variable_bins_ROOT[variable]
 
     printout = '%% ' + '=' * 60
     printout += '\n'
-    printout += '%% Fit sesults for %s variable, %s channel, met type %s \n' % (variable, channel, met_type)
+    printout += '%% Fit results for %s variable, %s channel, met type %s \n' % (variable, channel, met_type)
     printout += '%% ' + '=' * 60
     printout += '\n'
 
@@ -222,20 +216,25 @@ def print_fit_results_table(initial_values, fit_results, channel, toFile = True)
     printout += '\\end{table}\n'
 
     if toFile:
-        path = output_folder + '/'  + str(measurement_config.centre_of_mass_energy) + 'TeV/'  + variable
+        path = output_folder + '/'  + str(measurement_config.centre_of_mass_energy) + 'TeV/'  + variable + '/' + category
         make_folder_if_not_exists(path)
         file_template = path + '/%s_fit_results_table_%dTeV_%s.tex' % (variable, measurement_config.centre_of_mass_energy, channel)
         output_file = open(file_template, 'w')
         output_file.write(printout)
         output_file.close()
+        print "Wrote to file ", file_template, " in print_fit_results_table"
     else:
         print printout
 
-def print_xsections(xsections, channel, toFile = True, print_before_unfolding = False):
+def print_xsections(xsections, channel, category, toFile = True, print_before_unfolding = False):
     global output_folder, variable, k_values, met_type, b_tag_bin
+#     print "channel = ", channel
+#     print "category = ", category
+#     print "xsections = ", xsections
+    
     printout = '%% ' + '=' * 60
     printout += '\n'
-    printout += '%% Results for %s variable, %s channel, k-value %s, met type %s, %s b-tag region\n' % (variable, channel, str(k_values[channel]), met_type, b_tag_bin)
+    printout += '%% Results for %s variable, %s channel, %s measurement, k-value %s, met type %s, %s b-tag region\n' % (variable, channel, category, str(k_values[channel]), met_type, b_tag_bin)
     if print_before_unfolding:
         printout += '%% BEFORE UNFOLDING\n'
     printout += '%% ' + '=' * 60
@@ -246,6 +245,8 @@ def print_xsections(xsections, channel, toFile = True, print_before_unfolding = 
     printout += '\\centering\n'
     printout += '\\caption{Normalised \\ttbar cross section measurement with respect to \\%s variable\n' % variable
     printout += 'at a centre-of-mass energy of %d TeV ' % measurement_config.centre_of_mass_energy
+    if category != 'central':
+        printout += 'for the %s measurement ' % category
     if channel == 'combined':
         printout += '(combination of electron and muon channels).'
     else:
@@ -260,21 +261,40 @@ def print_xsections(xsections, channel, toFile = True, print_before_unfolding = 
     scale = 1000
     
     bins = variable_bins_ROOT[variable]
-    assert(len(bins) == len(xsections['unfolded_with_systematics']))
+    #print "xsections = ", xsections
+ 
+ #add code to read from files in sytematic folders and calculate their own errors here
+    if category == 'central':
+        assert(len(bins) == len(xsections['unfolded_with_systematics']))        
+    elif category != 'central':
+        assert(len(bins) == len(xsections['unfolded']))
+#    assert (len(bins) == len(xsections['unfolded']))
     
     for bin_i, variable_bin in enumerate(bins):
         if print_before_unfolding:
             value, stat_error = xsections['measured'][bin_i]
-            _, total_error_up, total_error_down = xsections['measured_with_systematics'][bin_i]
+            if category == 'central':
+                _, total_error_up, total_error_down = xsections['measured_with_systematics'][bin_i]
+            #no need for if != 'central' because only need the value and the statistical error (which is symmetrised)
         else:
             value, stat_error = xsections['unfolded'][bin_i]
-            _, total_error_up, total_error_down = xsections['unfolded_with_systematics'][bin_i]
-        # extracting the systematic error from the total in quadrature
-        syst_error_up = math.sqrt(total_error_up**2 - stat_error**2)
-        syst_error_down = math.sqrt(total_error_down**2 - stat_error**2)
+            if category == 'central':
+                _, total_error_up, total_error_down = xsections['unfolded_with_systematics'][bin_i]
+        
+        if category == 'central':
+            # extracting the systematic error from the total in quadrature
+            syst_error_up = math.sqrt(total_error_up**2 - stat_error**2)
+            syst_error_down = math.sqrt(total_error_down**2 - stat_error**2)
+        elif category != 'central':
+            syst_error_up = 0
+            syst_error_down = 0
+            total_error_up = stat_error
+            total_error_down = stat_error
+
         #relative errors for percentages
         total_relativeError_up = getRelativeError(value, total_error_up)
         total_relativeError_down = getRelativeError(value, total_error_down)
+
         if total_error_up == total_error_down:
             printout += '%s & ' % variable_bins_latex[variable_bin] + ' $%.2f$ & $ \pm~ %.2f^\\dagger$ & $ \pm~ %.2f^\\star$ & ' % (value * scale, stat_error * scale, syst_error_up * scale) +\
                     '$(%.2f' % (total_relativeError_up * 100) + '\%)$'
@@ -289,7 +309,7 @@ def print_xsections(xsections, channel, toFile = True, print_before_unfolding = 
     printout += '\\end{table}\n'
     
     if toFile:
-        path = output_folder + '/'  + str(measurement_config.centre_of_mass_energy) + 'TeV/'  + variable
+        path = output_folder + '/'  + str(measurement_config.centre_of_mass_energy) + 'TeV/'  + variable + '/' + category
         make_folder_if_not_exists(path)
         file_template = path + '/%s_normalised_xsection_%dTeV_%s.tex' % (variable, measurement_config.centre_of_mass_energy, channel)
 
@@ -299,10 +319,11 @@ def print_xsections(xsections, channel, toFile = True, print_before_unfolding = 
         output_file = open(file_template, 'w')
         output_file.write(printout)
         output_file.close()
+        print "Wrote to file ", file_template, " in print_xsections"
     else:
         print printout
 
-def print_error_table(central_values, errors, channel, toFile = True, print_before_unfolding = False):
+def print_error_table(central_values, errors, channel, category, toFile = True, print_before_unfolding = False):
     global output_folder, variable, k_values, met_type, b_tag_bin, all_measurements
     bins = variable_bins_ROOT[variable]
 
@@ -337,15 +358,20 @@ def print_error_table(central_values, errors, channel, toFile = True, print_befo
         assert(len(bins) == len(central_values['unfolded']))
     
     for bin_i, variable_bin in enumerate(bins):
+        print "bin_i = ", bin_i
         header += '& %s' % (variable_bins_latex[variable_bin])
         if print_before_unfolding:
             central_value = central_values['measured'][bin_i][0]
         else:
+            print "central values = ", central_values 
             central_value = central_values['unfolded'][bin_i][0]
 
         for source in all_measurements:
+            print "source = ", source
             abs_error = errors[source][bin_i]
+            print "error = ", abs_error
             relative_error = getRelativeError(central_value, abs_error)
+            print "relative error = ", relative_error
             text = '%.2f' % (relative_error*100)
             if rows.has_key(source):
                 rows[source].append(text)
@@ -377,6 +403,8 @@ def print_error_table(central_values, errors, channel, toFile = True, print_befo
             value, error_up, error_down = central_values['unfolded_with_systematics'][bin_i]
         error = max(error_up, error_down)
         relativeError = getRelativeError(value, error)
+        print "value = ", value
+        print "error = ", error
         total_line += ' & %.2f ' % (relativeError * 100)
     printout += total_line + '\\\\ \n'
     printout += '\\hline \n'
@@ -385,7 +413,7 @@ def print_error_table(central_values, errors, channel, toFile = True, print_befo
     printout += '\\end{table}\n'
     
     if toFile:
-        path = output_folder + '/'  + str(measurement_config.centre_of_mass_energy) + 'TeV/'  + variable
+        path = output_folder + '/'  + str(measurement_config.centre_of_mass_energy) + 'TeV/'  + variable + '/' + category
         make_folder_if_not_exists(path)
         file_template = path + '/%s_systematics_%dTeV_%s.tex' % (variable, measurement_config.centre_of_mass_energy, channel)
 
@@ -395,6 +423,7 @@ def print_error_table(central_values, errors, channel, toFile = True, print_befo
         output_file = open(file_template, 'w')
         output_file.write(printout)
         output_file.close()
+        print "Wrote to file ", file_template, " in print_error_table"
     else:
         print printout
 
@@ -416,6 +445,7 @@ if __name__ == '__main__':
                       help="creates a set of tables for each systematic (in addition to central result).")
 
     (options, args) = parser.parse_args()
+    
     measurement_config = XSectionConfig(options.CoM)
     # caching of variables for shorter access
     translate_options = measurement_config.translate_options
@@ -458,19 +488,24 @@ if __name__ == '__main__':
     all_measurements.extend(met_uncertainties)
     all_measurements.extend(new_uncertainties)
     all_measurements.extend(rate_changing_systematics)
-
-    for channel in ['electron', 'muon', 'combined']:                        
-        normalised_xsection_measured_unfolded, normalised_xsection_measured_errors, normalised_xsection_unfolded_errors = read_xsection_measurement_results_with_errors(channel)
-
-        print_xsections(normalised_xsection_measured_unfolded, channel, toFile = True, print_before_unfolding = False)
-        print_xsections(normalised_xsection_measured_unfolded, channel, toFile = True, print_before_unfolding = True)
-
-        print_error_table(normalised_xsection_measured_unfolded, normalised_xsection_unfolded_errors, channel, toFile = True, print_before_unfolding = False)
-        print_error_table(normalised_xsection_measured_unfolded, normalised_xsection_measured_errors, channel, toFile = True, print_before_unfolding = True)
-
-        if not channel == 'combined':
-            fit_input = read_fit_input(path_to_JSON, variable, 'central', channel, met_type)
-            fit_results = read_fit_results(path_to_JSON, variable, 'central', channel, met_type)
-            print_fit_results_table(fit_input, fit_results, channel, toFile = True)
-
     
+    for channel in ['electron', 'muon', 'combined']:
+        for category in all_measurements:
+            if (not category == 'central' and not options.additional_tables) or (category in new_uncertainties) :
+                continue
+            else:
+#                 print "Should be doing as intended for category: ", category, "!"
+                normalised_xsection_measured_unfolded, normalised_xsection_measured_errors, normalised_xsection_unfolded_errors = read_xsection_measurement_results_with_errors(channel, category)
+        
+#                 print "Should be writing tables as intended for category: ", category, "!"
+                print_xsections(normalised_xsection_measured_unfolded, channel, category, toFile = True, print_before_unfolding = False)
+                print_xsections(normalised_xsection_measured_unfolded, channel, category, toFile = True, print_before_unfolding = True)
+
+                if category == 'central':
+                    print_error_table(normalised_xsection_measured_unfolded, normalised_xsection_unfolded_errors, channel, category, toFile = True, print_before_unfolding = False)
+                    print_error_table(normalised_xsection_measured_unfolded, normalised_xsection_measured_errors, channel, category, toFile = True, print_before_unfolding = True)
+            
+                if not channel == 'combined':
+                    fit_input = read_fit_input(path_to_JSON, variable, 'central', channel, met_type)
+                    fit_results = read_fit_results(path_to_JSON, variable, 'central', channel, met_type)
+                    print_fit_results_table(fit_input, fit_results, channel, category, toFile = True)

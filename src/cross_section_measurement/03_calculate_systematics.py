@@ -288,6 +288,7 @@ if __name__ == "__main__":
                                                                                                 ttbar_mass_max,
                                                                                                 kValue_max,
                                                                                                 pdf_max, met_max, other_max] )
+        #these are the generator systematics
         central_measurement_with_systematics_but_without_ttbar_theory = get_measurement_with_lower_and_upper_errors( central_measurement,
                                                                                                 [pdf_min, met_min, other_min,
                                                                                                 ttbar_mass_min,
@@ -297,6 +298,7 @@ if __name__ == "__main__":
                                                                                                 ttbar_mass_max,
                                                                                                 kValue_max,
                                                                                                  ttbar_generator_max] )
+        #these are the ttbar theory systematics
         central_measurement_with_systematics_but_without_generator = get_measurement_with_lower_and_upper_errors( central_measurement,
                                                                                                 [ttbar_hadronisation_min, #ttbar_ptreweight_min,
                                                                                                 ttbar_mass_min,

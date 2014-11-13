@@ -397,7 +397,7 @@ if __name__ == '__main__':
                       help = "Just run the central measurement" )
     parser.add_option( '--disable-constraints', dest = "enable_constraints", 
                        action = "store_false", default=True,
-                       help = "Do not make a combined template from TTbar and single top" )
+                       help = "Apply constraints to templates during fitting." )
 
     translate_options = {
                         '0':'0btag',

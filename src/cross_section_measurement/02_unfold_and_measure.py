@@ -73,6 +73,7 @@ def unfold_results( results, category, channel, k_value, h_truth, h_measured, h_
             unfoldingObjectFile.Close()
     
     del unfolding
+    print "hist_to_value_error_tuplelist( h_unfolded_data ) = ", hist_to_value_error_tuplelist( h_unfolded_data )
     return hist_to_value_error_tuplelist( h_unfolded_data )
 
 def data_covariance_matrix( data ):
@@ -257,11 +258,16 @@ def get_unfolded_normalisation( TTJet_fit_results, category, channel, k_value ):
                               'scaledown': scaledown_results,
                               'scaleup': scaleup_results
                               }
+    print "did get_unfolded_normalisation for category = ", category
+    
+    print "normalisation_unfolded = ", normalisation_unfolded
     
     return normalisation_unfolded
     
 def calculate_xsections( normalisation, category, channel, k_value = None ):
     global variable, met_type, path_to_JSON
+    print "calculate_xsections: category = ", category
+    print "calculate_xsections: normalisation = ", normalisation
     # calculate the x-sections
     branching_ratio = 0.15
     if channel == 'combined':
@@ -298,10 +304,15 @@ def calculate_xsections( normalisation, category, channel, k_value = None ):
     else:
         filename = path_to_JSON + '/xsection_measurement_results/%s/%s/xsection_%s.txt' % ( channel, category, met_type )
 
+    print "calculate_xsections: saving to file = ", filename
+
     write_data_to_JSON( xsection_unfolded, filename )
     
 def calculate_normalised_xsections( normalisation, category, channel, k_value = None, normalise_to_one = False ):
     global variable, met_type, path_to_JSON
+    print "calculate_normalised_xsections: normalise_to_one = ", normalise_to_one
+    print "calculate_normalised_xsections: normalisation = ", normalisation
+    
     TTJet_normalised_xsection = calculate_normalised_xsection( normalisation['TTJet_measured'], bin_widths[variable], normalise_to_one )
     TTJet_normalised_xsection_unfolded = calculate_normalised_xsection( normalisation['TTJet_unfolded'], bin_widths[variable], normalise_to_one )
     MADGRAPH_normalised_xsection = calculate_normalised_xsection( normalisation['MADGRAPH'], bin_widths[variable], normalise_to_one )
@@ -332,9 +343,11 @@ def calculate_normalised_xsections( normalisation, category, channel, k_value = 
         filename = path_to_JSON + '/xsection_measurement_results/%s/kv%d/%s/normalised_xsection_%s.txt' % ( channel, k_value, category, met_type )        
     else:
         filename = path_to_JSON + '/xsection_measurement_results/%s/%s/normalised_xsection_%s.txt' % ( channel, category, met_type )
-    
+
     if normalise_to_one:
         filename = filename.replace( 'normalised_xsection', 'normalised_to_one_xsection' )
+
+    print "calculate_normalised_xsections: saving to file = ", filename
     write_data_to_JSON( normalised_xsection, filename )
 
 if __name__ == '__main__':

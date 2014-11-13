@@ -9,13 +9,13 @@ from config.variable_binning import bin_edges, variable_bins_ROOT, fit_variable_
 from config import XSectionConfig
 from tools.file_utilities import read_data_from_JSON, make_folder_if_not_exists
 from tools.hist_utilities import value_error_tuplelist_to_hist, \
-value_tuplelist_to_hist, value_errors_tuplelist_to_graph, graph_to_value_errors_tuplelist
+value_tuplelist_to_hist, value_errors_tuplelist_to_graph, graph_to_value_errors_tuplelist, spread_x, graph_to_hist
 from math import sqrt
 # rootpy & matplotlib
 from ROOT import kRed, kGreen, kMagenta, kBlue, kBlack
 from tools.ROOT_utililities import set_root_defaults
 import matplotlib as mpl
-from tools.plotting import get_best_max_y
+from tools.plotting import get_best_max_y, Histogram_properties, compare_measurements
 mpl.use( 'agg' )
 import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
@@ -23,6 +23,9 @@ import matplotlib.gridspec as gridspec
 from matplotlib.ticker import MultipleLocator
 from config import CMS
 from matplotlib import rc
+from rootpy.plotting import Hist
+from rootpy import asrootpy
+from tools.hist_utilities import hist_to_value_error_tuplelist, graph_to_value_errors_tuplelist
 rc( 'font', **CMS.font )
 rc( 'text', usetex = True )
 
@@ -282,7 +285,16 @@ def make_plots( histograms, category, output_folder, histname, show_ratio = True
         channel = 'muon'
     else:
         channel = 'combined'
-        
+#    print "histograms = ", histograms
+    
+#    histograms_with_spread = {}
+    #spread out the points in each bin along the width of the bin, otherwise they end up all on top of each other
+#    graphs = spread_x( histograms.values(), bin_edges[variable] )
+#    for key, graph in zip( histograms.keys(), graphs ):
+#        histograms_with_spread[key] = graph
+    
+#    print "histograms_with_spread = ", histograms_with_spread
+    
     # plot with matplotlib
     hist_data = histograms['unfolded']
     if category == 'central':
@@ -436,54 +448,211 @@ def make_plots( histograms, category, output_folder, histname, show_ratio = True
 
 def plot_central_and_systematics( channel, systematics, exclude = [], suffix = 'altogether' ):
     global variable, k_values, b_tag_bin, met_type
+    
+    graph_data_central = read_xsection_measurement_results( 'central', channel )[0]['unfolded_with_systematics']
+    values_and_errors_of_graph_data_central = graph_to_value_errors_tuplelist(graph_data_central)
+    #print "bin_edges = ", bin_edges
+    #print "bin_edges[variable] = ", bin_edges[variable]
+    #print "values_and_errors_of_graph_data_central = ", values_and_errors_of_graph_data_central
+    hist_data_central = value_error_tuplelist_to_hist(values_and_errors_of_graph_data_central, bin_edges[variable])
 
-    plt.figure( figsize = ( 16, 16 ), dpi = 200, facecolor = 'white' )
-    axes = plt.axes()
-    axes.minorticks_on()
+#    hist_data_central = graph_to_hist(graph_data_central, bin_edges[variable])
+#    print "hist_data_central = ", hist_data_central
+    histogram_properties = Histogram_properties()
+    histogram_properties.name = '/normalised_xsection_' + channel + '_' + suffix + '_kv' + str( k_values[channel] )
+    if channel == 'combined':
+        histogram_properties.name = histogram_properties.name.replace( '_kv' + str( k_values[channel] ), '' )
+    histogram_properties.title = get_cms_labels( channel )
+    histogram_properties.x_axis_title = '$%s$ [GeV]' % variables_latex[variable]
+    histogram_properties.y_axis_title = r'$\frac{1}{\sigma}  \frac{d\sigma}{d' + variables_latex[variable] + '} \left[\mathrm{GeV}^{-1}\\right]$'
+    histogram_properties.legend_location = 'upper right'
+    histogram_properties.legend_properties = {'size':25}
+    histogram_properties.legend_columns = 2
+#    histogram_properties.set_log_y = True
+    histogram_properties_measured = deepcopy (histogram_properties)
+    histogram_properties_measured.name = '/normalised_xsection_' + channel + '_' + suffix + '_kv' + str( k_values[channel]) + '_before_unfolding'
+    if channel == 'combined':
+        histogram_properties_measured.name = histogram_properties_measured.name.replace( '_kv' + str( k_values[channel] ), '' )
     
-    hist_data_central = read_xsection_measurement_results( 'central', channel )[0]['unfolded_with_systematics']
-    hist_data_central.markersize = 2  # points. Imagine, tangible units!
-    hist_data_central.marker = 'o'
-    
-    
-    plt.xlabel( '$%s$ [GeV]' % variables_latex[variable], CMS.x_axis_title )
-    plt.ylabel( r'$\frac{1}{\sigma}  \frac{d\sigma}{d' + variables_latex[variable] + '} \left[\mathrm{GeV}^{-1}\\right]$', CMS.y_axis_title )
-    plt.tick_params( **CMS.axis_label_major )
-    plt.tick_params( **CMS.axis_label_minor )
-
-    rplt.errorbar( hist_data_central, axes = axes, label = 'data', xerr = True )
+#    plt.legend( numpoints = 1, loc = 'upper right', prop = {'size':25}, ncol = 2 )
+    measurements_measured = {}
+    measurements_unfolded = {}
 
     for systematic in sorted( systematics ):
         if systematic in exclude or systematic == 'central':
             continue
 
-        hist_data_systematic = read_xsection_measurement_results( systematic, channel )[0]['unfolded']
-        hist_data_systematic.markersize = 2
-        hist_data_systematic.marker = 'o'
+        hist_data_systematic_measured = read_xsection_measurement_results( systematic, channel )[0]['measured']
+        hist_data_systematic_unfolded = read_xsection_measurement_results( systematic, channel )[0]['unfolded']        
+        
+        #convert systematic into latex compliant format, so that the histogram can be plotted without errors later
+        if 'PDF' in systematic:
+            systematic = systematic.replace( 'Weights_', ' ' )
+        elif met_type in systematic:
+            systematic = met_systematics_latex[systematic.replace( met_type, '' )]
+        else:
+            systematic = measurements_latex[systematic]
+
+        measurements_measured[systematic] = hist_data_systematic_measured
+        measurements_unfolded[systematic] = hist_data_systematic_unfolded
+#    models = {'data' : asrootpy(hist_data_central.GetHistogram())}
+    models = {'data' : hist_data_central}
+
+    #print "hist_to_value_error_tuplelist(models['data') = ", hist_to_value_error_tuplelist(models['data'])
+    #print "models['data'].nbins() = ", models['data'].nbins()
+
+    # get some spread in x    
+    graphs_measured = spread_x( measurements_measured.values(), bin_edges[variable] )
+    graphs_unfolded = spread_x( measurements_unfolded.values(), bin_edges[variable] )
+    for key, graph in zip( measurements_unfolded.keys(), graphs_unfolded ):
+        measurements_unfolded[key] = graph
+    for key, graph in zip( measurements_measured.keys(), graphs_measured ):
+        measurements_measured[key] = graph
+    
+#     print "models = ", models
+#     print "measurements_unfolded = ", measurements_unfolded
+#     print "measurements_measured = ", measurements_measured
+    
+    #print "histogram_properties = ", histogram_properties
+
+    #path to put plots with all systematics
+    path = output_folder + str( measurement_config.centre_of_mass_energy ) + 'TeV/' + variable
+    make_folder_if_not_exists( path )
+    
+#    print "histogram_properties_measured.name = ", histogram_properties_measured.name
+#    print "histogram_properties.name = ", histogram_properties.name
+    
+    compare_measurements( models, measurements_measured, show_measurement_errors = True,
+                          histogram_properties = histogram_properties_measured,
+                          save_folder = path, save_as = output_formats )
+
+    compare_measurements( models, measurements_unfolded, show_measurement_errors = True,
+                          histogram_properties = histogram_properties,
+                          save_folder = path, save_as = output_formats )
+
+
+#         
+#         hist_data_systematic.markersize = 2
+#         hist_data_systematic.marker = 'o'
+#         colour_number = systematics.index( systematic ) + 2
+#         if colour_number == 10:
+#             colour_number = 42
+#         hist_data_systematic.SetMarkerColor( colour_number )
+#         if 'PDF' in systematic:
+#             rplt.errorbar( hist_data_systematic, axes = axes, label = systematic.replace( 'Weights_', ' ' ), xerr = False )
+#         elif met_type in systematic:
+#             rplt.errorbar( hist_data_systematic, axes = axes, label = met_systematics_latex[systematic.replace( met_type, '' )], xerr = False )
+#         else:
+#             rplt.errorbar( hist_data_systematic, axes = axes, label = measurements_latex[systematic], xerr = False )
+    
+    # old
+#     plt.figure( figsize = ( 16, 16 ), dpi = 200, facecolor = 'white' )
+#     axes = plt.axes()
+#     axes.minorticks_on()
+    #spread out the points in each bin along the width of the bin, otherwise they end up all on top of each other
+#     graphs = spread_x( [graph_data_central], bin_edges[variable] )
+#     graph_data_central = graphs[0]
+#     for key, graph in zip( 'graph_data_central', graphs ):
+#         histograms[key] = graph
+#         
+#     graph_data_central.markersize = 2  # points. Imagine, tangible units!
+#     graph_data_central.marker = 'o'
+#     
+#     plt.xlabel( '$%s$ [GeV]' % variables_latex[variable], CMS.x_axis_title )
+#     plt.ylabel( r'$\frac{1}{\sigma}  \frac{d\sigma}{d' + variables_latex[variable] + '} \left[\mathrm{GeV}^{-1}\\right]$', CMS.y_axis_title )
+#     plt.tick_params( **CMS.axis_label_major )
+#     plt.tick_params( **CMS.axis_label_minor )
+# 
+#     rplt.errorbar( graph_data_central, axes = axes, label = 'data', xerr = True )
+# 
+#     for systematic in sorted( systematics ):
+#         if systematic in exclude or systematic == 'central':
+#             continue
+# 
+#         hist_data_systematic = read_xsection_measurement_results( systematic, channel )[0]['unfolded']
+#         hist_data_systematic.markersize = 2
+#         hist_data_systematic.marker = 'o'
+#         colour_number = systematics.index( systematic ) + 2
+#         if colour_number == 10:
+#             colour_number = 42
+#         hist_data_systematic.SetMarkerColor( colour_number )
+#         if 'PDF' in systematic:
+#             rplt.errorbar( hist_data_systematic, axes = axes, label = systematic.replace( 'Weights_', ' ' ), xerr = False )
+#         elif met_type in systematic:
+#             rplt.errorbar( hist_data_systematic, axes = axes, label = met_systematics_latex[systematic.replace( met_type, '' )], xerr = False )
+#         else:
+#             rplt.errorbar( hist_data_systematic, axes = axes, label = measurements_latex[systematic], xerr = False )
+#             
+#     plt.legend( numpoints = 1, loc = 'upper right', prop = {'size':25}, ncol = 2 )
+#     plt.title( get_cms_labels( channel ), CMS.title )
+#     plt.tight_layout()
+# 
+#     
+#     path = output_folder + str( measurement_config.centre_of_mass_energy ) + 'TeV/' + variable
+#     make_folder_if_not_exists( path )
+#     for output_format in output_formats:
+#         filename = path + '/normalised_xsection_' + channel + '_' + suffix + '_kv' + str( k_values[channel] ) + '.' + output_format
+#         if channel == 'combined':
+#             filename = filename.replace( '_kv' + str( k_values[channel] ), '' )
+#         plt.savefig( filename ) 
+# 
+#     plt.close()
+    gc.collect()
+
+def make_systematic_comparison_plots(channel, systematics, exclude = [], suffix = '' ):
+    global variable, k_values
+    
+    plt.figure( figsize = ( 16, 16 ), dpi = 200, facecolor = 'white' )
+    axes = plt.axes()
+    axes.minorticks_on()
+     
+    graph_data_central = read_xsection_measurement_results( 'central', channel )[0]['unfolded_with_systematics']
+    values_and_errors_of_graph_data_central = graph_to_value_errors_tuplelist(graph_data_central)
+    hist_data_central = value_error_tuplelist_to_hist(values_and_errors_of_graph_data_central, bin_edges[variable])
+    
+    plt.xlabel( '$%s$ [GeV]' % variables_latex[variable], CMS.x_axis_title )
+    plt.ylabel( r'$\frac{1}{\sigma} \frac{d\sigma}{d' + variables_latex[variable] + '} \left[\mathrm{GeV}^{-1}\\right]$', CMS.y_axis_title )
+    plt.tick_params( **CMS.axis_label_major )
+    plt.tick_params( **CMS.axis_label_minor )
+    
+#    print "systematics = ", systematics
+     
+    for systematic in sorted( systematics ):
+#        print "systematic = ", systematic
+        if systematic in exclude or systematic == 'central':
+            continue
+        hist_data_systematic_unfolded = read_xsection_measurement_results( systematic, channel )[0]['unfolded']
+#        hist_data_systematic_measured = read_xsection_measurement_results( systematic, channel )[0]['measured']
+
+        # plot difference between central measurement and systematic measurement
+        difference = hist_data_systematic_unfolded - hist_data_central
+        difference.markersize = 2 # points. Imagine, tangible units!
+        difference.marker = 'o'
         colour_number = systematics.index( systematic ) + 2
         if colour_number == 10:
             colour_number = 42
-        hist_data_systematic.SetMarkerColor( colour_number )
+        difference.SetMarkerColor( colour_number )
+        
         if 'PDF' in systematic:
-            rplt.errorbar( hist_data_systematic, axes = axes, label = systematic.replace( 'Weights_', ' ' ), xerr = False )
+            rplt.errorbar( difference, axes = axes, label = systematic.replace( 'Weights_', ' ' ), xerr = False )
         elif met_type in systematic:
-            rplt.errorbar( hist_data_systematic, axes = axes, label = met_systematics_latex[systematic.replace( met_type, '' )], xerr = False )
+            rplt.errorbar( difference, axes = axes, label = met_systematics_latex[systematic.replace( met_type, '' )], xerr = False )
         else:
-            rplt.errorbar( hist_data_systematic, axes = axes, label = measurements_latex[systematic], xerr = False )
-            
+            rplt.errorbar( difference, axes = axes, label = measurements_latex[systematic], xerr = False )
+    
     plt.legend( numpoints = 1, loc = 'upper right', prop = {'size':25}, ncol = 2 )
     plt.title( get_cms_labels( channel ), CMS.title )
     plt.tight_layout()
-
     
-    path = output_folder + str( measurement_config.centre_of_mass_energy ) + 'TeV/' + variable
+    path = output_folder + str( measurement_config.centre_of_mass_energy ) + 'TeV/' + variable + '/systematic_differences'
     make_folder_if_not_exists( path )
     for output_format in output_formats:
-        filename = path + '/normalised_xsection_' + channel + '_' + suffix + '_kv' + str( k_values[channel] ) + '.' + output_format
-        if channel == 'combined':
-            filename = filename.replace( '_kv' + str( k_values[channel] ), '' )
-        plt.savefig( filename ) 
-
+         filename = path + '/difference_from_central_' + channel + '_' + suffix + '_kv' + str( k_values[channel] ) + '.' + output_format
+         if channel == 'combined':
+             filename = filename.replace( '_kv' + str( k_values[channel] ), '' )
+#         print "filename = ", filename
+         plt.savefig( filename )
+    
     plt.close()
     gc.collect()
 
@@ -516,7 +685,7 @@ if __name__ == '__main__':
     parser.add_option( "-a", "--additional-plots", action = "store_true", dest = "additional_plots",
                       help = "creates a set of plots for each systematic (in addition to central result)." )
     
-    output_formats = ['png', 'pdf']
+    output_formats = ['pdf'] #'png'
     ( options, args ) = parser.parse_args()
     
     measurement_config = XSectionConfig( options.CoM )
@@ -585,7 +754,7 @@ if __name__ == '__main__':
                 if met_type == 'PFMETJetEnDown':
                     met_type = 'patPFMetJetEnDown'
             
-            if not channel == 'combined':
+            if not (channel == 'combined') and not (category in ttbar_generator_systematics or not category in vjets_generator_systematics):
                 fit_templates, fit_results = read_fit_templates_and_results_as_histograms( category, channel )
                 make_template_plots( fit_templates, category, channel )
                 plot_fit_results( fit_results, category, channel )
@@ -597,27 +766,42 @@ if __name__ == '__main__':
             
             histograms_normalised_xsection_different_generators, histograms_normalised_xsection_systematics_shifts = read_xsection_measurement_results( category, channel )
     
-            make_plots( histograms_normalised_xsection_different_generators, category, output_folder, 'normalised_xsection_' + channel + '_different_generators' )
-            make_plots( histograms_normalised_xsection_systematics_shifts, category, output_folder, 'normalised_xsection_' + channel + '_systematics_shifts' )
+#             make_plots( histograms_normalised_xsection_different_generators, category, output_folder, 'normalised_xsection_' + channel + '_different_generators' )
+#             make_plots( histograms_normalised_xsection_systematics_shifts, category, output_folder, 'normalised_xsection_' + channel + '_systematics_shifts' )
 
             del histograms_normalised_xsection_different_generators, histograms_normalised_xsection_systematics_shifts
-    
+        
         plot_central_and_systematics( channel, categories, exclude = ttbar_generator_systematics )
         
-        plot_central_and_systematics( channel, ttbar_generator_systematics, suffix = 'ttbar_generator_only' )
-        
-        exclude = set( pdf_uncertainties ).difference( set( pdf_uncertainties_1_to_11 ) )
-        plot_central_and_systematics( channel, pdf_uncertainties_1_to_11, exclude = exclude, suffix = 'PDF_1_to_11' )
-        
-        exclude = set( pdf_uncertainties ).difference( set( pdf_uncertainties_12_to_22 ) )
-        plot_central_and_systematics( channel, pdf_uncertainties_12_to_22, exclude = exclude, suffix = 'PDF_12_to_22' )
-        
-        exclude = set( pdf_uncertainties ).difference( set( pdf_uncertainties_23_to_33 ) )
-        plot_central_and_systematics( channel, pdf_uncertainties_23_to_33, exclude = exclude, suffix = 'PDF_23_to_33' )
-        
-        exclude = set( pdf_uncertainties ).difference( set( pdf_uncertainties_34_to_45 ) )
-        plot_central_and_systematics( channel, pdf_uncertainties_34_to_45, exclude = exclude, suffix = 'PDF_34_to_45' )
-        
-        plot_central_and_systematics( channel, met_uncertainties, suffix = 'MET_only' )
-        plot_central_and_systematics( channel, new_uncertainties, suffix = 'new_only' )
-        plot_central_and_systematics( channel, rate_changing_systematics, suffix = 'rate_changing_only' )
+#         plot_central_and_systematics( channel, ttbar_generator_systematics, suffix = 'ttbar_generator_only' )
+#         
+#         exclude = set( pdf_uncertainties ).difference( set( pdf_uncertainties_1_to_11 ) )
+#         plot_central_and_systematics( channel, pdf_uncertainties_1_to_11, exclude = exclude, suffix = 'PDF_1_to_11' )
+#         
+#         exclude = set( pdf_uncertainties ).difference( set( pdf_uncertainties_12_to_22 ) )
+#         plot_central_and_systematics( channel, pdf_uncertainties_12_to_22, exclude = exclude, suffix = 'PDF_12_to_22' )
+#         
+#         exclude = set( pdf_uncertainties ).difference( set( pdf_uncertainties_23_to_33 ) )
+#         plot_central_and_systematics( channel, pdf_uncertainties_23_to_33, exclude = exclude, suffix = 'PDF_23_to_33' )
+#         
+#         exclude = set( pdf_uncertainties ).difference( set( pdf_uncertainties_34_to_45 ) )
+#         plot_central_and_systematics( channel, pdf_uncertainties_34_to_45, exclude = exclude, suffix = 'PDF_34_to_45' )
+# 
+#         plot_central_and_systematics( channel, met_uncertainties, suffix = 'MET_only' )
+#         plot_central_and_systematics( channel, new_uncertainties, suffix = 'new_only' )
+#         plot_central_and_systematics( channel, rate_changing_systematics, suffix = 'rate_changing_only' )
+# 
+#         make_systematic_comparison_plots( channel, ['BJet_up', 'BJet_down'], suffix = 'BJet_up_down')
+#         make_systematic_comparison_plots( channel, ['Electron_down', 'Electron_up'], suffix = 'Electron_up_down')
+#         make_systematic_comparison_plots( channel, ['Muon_down', 'Muon_up'], suffix = 'Muon_up_down')
+#         make_systematic_comparison_plots( channel, ['JES_down', 'JES_up'], suffix = 'JES_up_down')
+#         make_systematic_comparison_plots( channel, ['JER_down', 'JER_up'], suffix = 'JER_up_down')
+#         make_systematic_comparison_plots( channel, ['luminosity-', 'luminosity+'], suffix = 'luminosity_up_down')
+#         make_systematic_comparison_plots( channel, ['LightJet_up', 'LightJet_down'], suffix = 'LightJet_up_down')
+#         make_systematic_comparison_plots( channel, ['PU_down', 'PU_up'], suffix = 'PU_up_down')
+#         make_systematic_comparison_plots( channel, ['SingleTop_cross_section-', 'SingleTop_cross_section+'], suffix = 'SingleTop_up_down')
+#         make_systematic_comparison_plots( channel, ['TTJet_cross_section-', 'TTJet_cross_section+'], suffix = 'TTJet_cross_section_up_down')
+#         make_systematic_comparison_plots( channel, ['TTJets_matchingdown', 'TTJets_matchingup'], suffix = 'TTJets_matching_up_down')
+#         make_systematic_comparison_plots( channel, ['TTJets_scaledown', 'TTJets_scaleup'], suffix = 'TTJets_scale_up_down')
+#         make_systematic_comparison_plots( channel, ['VJets_matchingdown', 'VJets_matchingup'], suffix = 'VJets_matching_up_down')
+#         make_systematic_comparison_plots( channel, ['VJets_scaledown', 'VJets_scaleup'], suffix = 'VJets_scale_up_down')
