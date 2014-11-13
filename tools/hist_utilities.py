@@ -57,9 +57,25 @@ def value_error_tuplelist_to_hist( value_error_tuplelist, bin_edges ):
     rootpy_hist = Hist( bin_edges, type = 'D' )
     set_bin_value = rootpy_hist.SetBinContent
     set_bin_error = rootpy_hist.SetBinError
-    for bin_i, ( value, error ) in enumerate( value_error_tuplelist ):
-        set_bin_value( bin_i + 1, value )
-        set_bin_error( bin_i + 1, error )
+
+    #if symmetric errors, set bin error as normal
+    if len(value_error_tuplelist[0]) == 2:
+        #fill the histogram
+        for bin_i, ( value, error ) in enumerate( value_error_tuplelist ):
+            set_bin_value( bin_i + 1, value )
+            set_bin_error( bin_i + 1, error )
+
+    #if asymmetric errors, get maximum error and use that as bin error
+    elif len(value_error_tuplelist[0]) == 3:
+        #fill the histogram
+        for bin_i, ( value, error_low, error_high ) in enumerate( value_error_tuplelist ):
+            #work out which of the two errors is larger
+            if (error_high - error_low) < 0:
+                error = error_low
+            else:
+                error = error_high
+            set_bin_value( bin_i + 1, value )
+            set_bin_error( bin_i + 1, error )
     return rootpy_hist
 
 def value_tuplelist_to_hist( value_tuplelist, bin_edges ):
@@ -326,6 +342,30 @@ def adjust_overflow_to_limit(histogram, x_min, x_max):
     histogram_.SetBinError(overflow_bin, overflow_error)     
         
     return histogram_
+
+def graph_to_hist(graph, bin_edges):
+    nbins = len(bin_edges)
+    hist = Hist(bin_edges)
+    
+    #loop through all bins in graph
+    for i in range(1, nbins + 1):
+        #get the bin content (x and y co-ordinates, since this is a TGraph, and + and - errors on point
+        point_content = graph.GetPoint(i, x, y)
+        point_error_low = graph.GetErrorYlow(i)
+        point_error_high = graph.GetErrorYhigh(i)
+        
+        #find the maximum error out of bin_error_low and bin_error_high and use that as the symmetrical error for the histogram
+        #since it seems histograms can only have symmetrical errors, while graphs can have asymmetrical errors.
+        if (point_error_high - point_error_low) < 0:
+            bin_error = point_error_low
+        else:
+            bin_error = point_error_high
+
+        #Set the content and errors for the histogram bin
+        hist.SetBinContent(i, y)
+        hist.SetBinError(i, bin_error)
+        
+        return hist
 
 def get_fit_results_histogram( data_path = 'data/absolute_eta_M3_angle_bl',
                                centre_of_mass = 8,

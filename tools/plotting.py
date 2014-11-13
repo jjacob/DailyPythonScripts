@@ -33,6 +33,7 @@ class Histogram_properties:
     legend_location = 'best'
     set_log_y = False
     legend_columns = 1
+    legend_properties = {}
     
     def __init__( self ):
         pass
@@ -307,6 +308,9 @@ def make_shape_comparison_plot( shapes = [],
     handles, labels = axes.get_legend_handles_labels()
     for i,name in enumerate(names):
         labels.insert(i, name)
+    
+    if histogram_properties.legend_properties:
+        CMS.legend_properties = histogram_properties.legend_properties
 
     plt.legend( handles, labels, numpoints = 1, loc = histogram_properties.legend_location,
                prop = CMS.legend_properties, ncol = histogram_properties.legend_columns ).set_zorder(102)
@@ -435,7 +439,7 @@ def compare_measurements( models = {}, measurements = {},
         histogram.linewidth = 2 
         histogram.color = next( colorcycler )
         histogram.linestyle = next( linecycler ) 
-        rplt.hist( histogram, axex = axes, label = label )
+        rplt.hist( histogram, axes = axes, label = label )
         
     for label, histogram in measurements.iteritems():
         histogram.markersize = 2 
@@ -447,7 +451,7 @@ def compare_measurements( models = {}, measurements = {},
     set_labels( plt, histogram_properties )
 
     plt.legend( numpoints = 1, loc = histogram_properties.legend_location,
-                prop = CMS.legend_properties )
+                prop = CMS.legend_properties, ncol = histogram_properties.legend_columns )
     adjust_axis_limits( axes, histogram_properties )
 
     x_limits = histogram_properties.x_limits
