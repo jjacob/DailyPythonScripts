@@ -14,10 +14,14 @@ jobs = [
         '-s matchingup',
         '-s matchingdown',
          
-        # Other generators
+        # # Other generators
         '-s powheg',
         '-s powhegherwig',
         '-s mcatnlo',
+
+        # Mass up/down
+        '-s massup',
+        '-s massdown',
         
         # Top pt reweighting
         '--topPtReweighting',
@@ -29,6 +33,14 @@ jobs = [
         # Scale up/down
         '--is7TeV -s scaleup',
         '--is7TeV -s scaledown',
+
+        # Matching up/down
+        '--is7TeV -s matchingup',
+        '--is7TeV -s matchingdown',
+
+        # Mass up/down
+        '--is7TeV -s massup',
+        '--is7TeV -s massdown',
                 
         # Top pt reweighting
         '--is7TeV --topPtReweighting',
@@ -39,7 +51,8 @@ jobs = [
 #     jobs.append('-p %i' % variation)
 #     jobs.append('--is7TeV -p %i' % variation)
 #     pass
-    
+
+# print len(jobs)
 parser = OptionParser()
 parser.add_option('-j','--job_number',type='int',dest='jobNumber',default=0)
 (options, _) = parser.parse_args()
