@@ -38,6 +38,10 @@ jobs = [
         '--is7TeV -s matchingup',
         '--is7TeV -s matchingdown',
 
+        # # Other generators
+        '--is7TeV -s powheg',
+        '--is7TeV -s powhegherwig',
+
         # Mass up/down
         '--is7TeV -s massup',
         '--is7TeV -s massdown',
@@ -47,10 +51,10 @@ jobs = [
         ]
 
  # Add pdf variations to list of jobs
-# for variation in range(1,45+1):
-#     jobs.append('-p %i' % variation)
-#     jobs.append('--is7TeV -p %i' % variation)
-#     pass
+for variation in range(1,45+1):
+    jobs.append('-p %i' % variation)
+    jobs.append('--is7TeV -p %i' % variation)
+    pass
 
 # print len(jobs)
 parser = OptionParser()
