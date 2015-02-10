@@ -164,7 +164,8 @@ class XSectionConfig():
         if self.centre_of_mass_energy == 8:
             self.__fill_defaults_8TeV__()
 
-        self.generator_systematics = [ 'matchingup', 'matchingdown', 'scaleup', 'scaledown' ]
+#         self.generator_systematics = [ 'scaleup', 'scaledown', 'matchingup', 'matchingdown' ]
+        self.generator_systematics = [ 'matchingup' ]
         self.topMass_systematics = [ 'TTJets_massup', 'TTJets_massdown']
         self.topMasses = [169.5, 172.5, 173.5]
         self.topMassUncertainty = 0.9

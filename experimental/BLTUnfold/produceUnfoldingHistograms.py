@@ -194,7 +194,7 @@ def main():
 
                 # Weights derived from variables in tree
                 if options.applyTopPtReweighting:
-                    ptWeight = topPtWeight( options.centreOfMassEnergy )
+                    ptWeight = topPtWeight( int(options.centreOfMassEnergy) )
                     offlineWeight += ' * '+ptWeight
                     genWeight += ' * '+ptWeight
                     pass

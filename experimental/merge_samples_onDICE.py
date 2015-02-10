@@ -58,12 +58,21 @@ allJobs = []
 for category in config.categories_and_prefixes.keys():
     for sample, input_samples in sample_summations.iteritems():
         # Only consider these samples
-        if not sample in ['WJets', 'DYJets', 'VJets-matchingup',
-                          'VJets-matchingdown', 'VJets-scaleup',
-                          'VJets-scaledown','QCD_Electron', 
-                          'QCD_Muon', 'VJets',
-                          'SingleTop']: #
+#         if not sample in ['WJets', 'DYJets', 'VJets-matchingup',
+#                           'VJets-matchingdown', 'VJets-scaleup',
+#                           'VJets-scaledown','QCD_Electron', 
+#                           'QCD_Muon', 'VJets',
+#                           'SingleTop']: #
+#             continue
+#         if sample in ['VJets']:
+#             print sample
+#             print category
+        if not sample in ['VJets'
+                          ]: #
             continue
+        if not category in ['PU_up'
+                                ]: #
+                continue
         # Only consider these samples for central
         if sample in ['WJets', 'DYJets', 'VJets-matchingup',
                       'VJets-matchingdown', 'VJets-scaleup',
@@ -75,7 +84,8 @@ for category in config.categories_and_prefixes.keys():
 
 if options.listJobs:
   print allJobs
-  print 'Total number of jobs for com ',options.com,':',len(allJobs)
+  print "allJobs[0] = ", allJobs[0]
+  print 'Total number of jobs for centre of mass ',options.com,':',len(allJobs)
   sys.exit()
   
 if options.jobNumber > (len(allJobs)-1):
