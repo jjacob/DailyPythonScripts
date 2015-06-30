@@ -222,6 +222,15 @@ class XSectionConfig():
                            'MT': 'TTbar_plus_X_analysis/%s/Ref selection/Binned_MT_Analysis/MT_with_%s_bin_%s/%s',
                            'WPT': 'TTbar_plus_X_analysis/%s/Ref selection/Binned_WPT_Analysis/WPT_with_%s_bin_%s/%s'
                            }
+        
+        #folder_template = '{path}/normalisation/{method}/{CoM}TeV/{variable}/{category}/'
+        self.variable_path_templates = {
+                           'MET' : 'TTbar_plus_X_analysis/{channel}/{selection}/MET/{met_type}/MET_{btag}',
+                           'HT' : 'TTbar_plus_X_analysis/{channel}/{selection}/MET/HT_{btag}',
+                           'ST': 'TTbar_plus_X_analysis/{channel}/{selection}/MET/{met_type}/ST_{btag}',
+                           'MT': 'TTbar_plus_X_analysis/{channel}/{selection}/MET/{met_type}/MT_{btag}',
+                           'WPT': 'TTbar_plus_X_analysis/{channel}/{selection}/MET/{met_type}/WPT_{btag}',
+                            }
 
         self.electron_control_region = 'QCDConversions'
         self.electron_control_region_systematic = 'QCD non iso e+jets'

@@ -11,12 +11,14 @@
 '''
 from __future__ import division
 from optparse import OptionParser
-from tools.ROOT_utils import set_root_defaults
+from tools.ROOT_utils import set_root_defaults, get_histogram_from_file
 from tools.logger import log
 from config import XSectionConfig
 from src.cross_section_measurement.lib import closure_tests
-from rootpy.io.file import File
 from tools.file_utilities import write_data_to_JSON
+from tools.hist_utilities import clean_control_region, rebin_asymmetric,\
+    hist_to_value_error_tuplelist
+from config.variable_binning import bin_edges as variable_bin_edges
 
 # define logger for this module
 mylog = log["01b_get_ttjet_normalisation"]
@@ -58,13 +60,130 @@ class TTJetNormalisation:
         
         self.met_type = config.translate_options['type1']
         self.fit_variables = ''
-        
+
         self.normalisation = {}
         self.initial_normalisation = {}
         self.templates = {}
-        
+
+        self.have_normalisation = False
+
+    @mylog.trace()
+    def calculate_normalisation( self ):
+        '''
+            1. get file names
+            2. get histograms from files
+            3. scale histograms
+            4. calculate normalisation based on self.method
+        '''
+        if self.have_normalisation:
+            return
+        input_files = self.get_input_files()
+
+        histograms = self.get_histograms( input_files )
+        histograms = self.scale_histograms( histograms )
+
+        for sample, hist in histograms.items():
+            # TODO: this should be a list of bin-contents
+            self.initial_normalisation[sample] = hist_to_value_error_tuplelist(hist)
+            if self.method == self.BACKGROUND_SUBTRACTION and sample != 'TTJet':
+                self.normalisation[sample] = self.initial_normalisation[sample]
+
+        if self.method == self.BACKGROUND_SUBTRACTION:
+            ttjet_hist = clean_control_region(histograms,
+                                              subtract = ['QCD', 'V+Jets', 'SingleTop'])
+            self.normalisation['TTJet'] = hist_to_value_error_tuplelist(ttjet_hist)
+
+        self.have_normalisation = True
+
+    @mylog.trace()
+    def get_input_files( self ):
+        # get data from histograms or JSON files
+        # data and muon_QCD file with SFs are the same for central measurement and all systematics
+        data_file, qcd_mc_file = None, None
+        if self.channel == 'electron':
+            data_file = measurement_config.data_file_electron
+            qcd_mc_file = measurement_config.electron_QCD_MC_file
+        if self.channel == 'muon':
+            data_file = measurement_config.data_file_muon
+            qcd_mc_file = measurement_config.muon_QCD_MC_file
+
+        SingleTop_file = measurement_config.SingleTop_file
+        TTJet_file = measurement_config.ttbar_category_templates[self.category]
+        VJets_file = measurement_config.VJets_category_templates[self.category]
+
+        return {
+                    'TTJet': TTJet_file,
+                    'SingleTop': SingleTop_file,
+                    'V+Jets': VJets_file,
+                    'data': data_file,
+                    'QCD' : qcd_mc_file,
+                }
+
+    @mylog.trace()
+    def get_histograms( self, input_files ):
+        if self.method == self.BACKGROUND_SUBTRACTION:
+            histograms = self.get_histograms_for_background_subtraction( input_files )
+            for sample, hist in histograms.items():
+                bin_edges = variable_bin_edges[self.variable]
+                histograms[sample] = rebin_asymmetric(hist, bin_edges)
+            return histograms
+
+    @mylog.trace()
+    def get_histograms_for_background_subtraction( self, input_files ):
+        # first, lets get the histograms from the signal region
+        inputs = {
+                    'channel' : measurement_config.analysis_types[self.channel],
+                    'met_type' : self.met_type,
+                    'selection' : 'Ref selection',
+                    'btag' : measurement_config.translate_options['2m'],  # 2 or more
+                  }
+        variable_template = measurement_config.variable_path_templates[self.variable]
+        hist = variable_template.format( **inputs )
+
+        # QCD control region
+        eqcd = measurement_config.electron_control_region
+        muqcd = measurement_config.muon_control_region
+        qcd_control_region = eqcd if self.channel == 'electron' else muqcd
+        inputs['selection'] = qcd_control_region
+        hist_qcd = variable_template.format( **inputs )
+
+        histograms = {}
+        control_region_hists = {}
+
+        for sample, f in input_files.items():
+            histograms[sample] = get_histogram_from_file( hist, f )
+            # next get QCD control region
+            if sample == 'QCD': # skip for QCD MC
+                continue
+            control_region_hists[sample] = get_histogram_from_file( hist_qcd, f )
+
+        qcd_mc_hist = histograms['QCD']
+        qcd_hist = clean_control_region( control_region_hists,
+                                        subtract = ['TTJet', 'V+Jets', 'SingleTop'],
+                                        )
+        # normalise to MC prediction
+        n_mc = qcd_mc_hist.Integral()
+        n_data = qcd_hist.Integral()
+        scale = 1
+        if not n_data == 0:
+            if not n_mc == 0:
+                scale = 1 / n_data * n_mc
+            else:
+                scale = 1 / n_data
+        qcd_hist.Scale(scale)
+        histograms['QCD'] = qcd_hist
+
+        return histograms
+
+    @mylog.trace()
+    def scale_histograms( self, histograms ):
+        return histograms
+
     @mylog.trace()
     def save( self, output_path ):
+        if not self.have_normalisation:
+            self.calculate_normalisation()
+
         folder_template = '{path}/normalisation/{method}/{CoM}TeV/{variable}/{category}/'
         inputs = {
               'path': output_path,
@@ -80,15 +199,15 @@ class TTJetNormalisation:
                   'channel' : self.channel,
                   'met_type' : self.met_type,
                   }
-        write_data_to_JSON(self.normalisation, 
-                           output_folder + file_template.format(type = 'normalisation', **inputs))
-        write_data_to_JSON(self.initial_normalisation, 
-                           output_folder + file_template.format(type = 'initial_normalisation', **inputs))
-        write_data_to_JSON(self.templates, 
-                           output_folder + file_template.format(type = 'templates', **inputs))
+        write_data_to_JSON( self.normalisation,
+                           output_folder + file_template.format( type = 'normalisation', **inputs ) )
+        write_data_to_JSON( self.initial_normalisation,
+                           output_folder + file_template.format( type = 'initial_normalisation', **inputs ) )
+        write_data_to_JSON( self.templates,
+                           output_folder + file_template.format( type = 'templates', **inputs ) )
         
         return output_folder
-    
+
     @mylog.trace()    
     def method_string( self ):
         if self.method == self.BACKGROUND_SUBTRACTION:
@@ -122,6 +241,7 @@ def parse_options():
 
 @mylog.trace()
 def main():
+    # for each measurement
     norm = TTJetNormalisation( 
                               config = measurement_config,
                               variable = variable,
@@ -130,51 +250,8 @@ def main():
                               method = TTJetNormalisation.BACKGROUND_SUBTRACTION,
                               )
     
+    norm.calculate_normalisation()
     norm.save( output_path )
-#     input_files_electron = get_input_files( 'central', 'electron' )
-    
-    
-
-@mylog.trace() 
-def get_input_files( category, channel ):
-    # get data from histograms or JSON files
-    # data and muon_QCD file with SFs are the same for central measurement and all systematics
-    data_file, qcd_mc_file = None, None
-    if channel == 'electron':
-        data_file = File( measurement_config.data_file_electron )
-        qcd_mc_file = File( measurement_config.electron_QCD_MC_file )
-    if channel == 'muon':
-        data_file = File( measurement_config.data_file_muon )
-        qcd_mc_file = File( measurement_config.muon_QCD_MC_file )
-    
-
-    SingleTop_file = File( measurement_config.SingleTop_file )
-    TTJet_file = File( measurement_config.ttbar_category_templates[category] )
-    VJets_file = File( measurement_config.VJets_category_templates[category] )
-    
-    return {
-                'TTJet': TTJet_file,
-                'SingleTop': SingleTop_file,
-                'V+Jets': VJets_file,
-                'data': data_file,
-                'QCD' : qcd_mc_file,
-            }
-    
-@mylog.trace()
-def get_histograms():
-    electron_control_region = measurement_config.electron_control_region
-    muon_control_region = measurement_config.muon_control_region
-
-@mylog.trace()
-def get_normalisation( method = 'background subtraction' ):
-    '''
-        Supported methods are 9or will be): 
-            - background subtraction
-            - Minuit (simultaneous fit)
-            - TFractionFitter (fit to single variable)
-    '''
-    pass
-
 
 if __name__ == '__main__':
     set_root_defaults()
