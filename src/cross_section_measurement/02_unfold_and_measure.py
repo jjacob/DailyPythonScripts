@@ -454,7 +454,7 @@ if __name__ == '__main__':
     all_measurements = deepcopy( categories )
     all_measurements.extend( pdf_uncertainties )
     all_measurements.extend( met_uncertainties )
-    all_measurements.extend( ['QCD_shape'] )
+#     all_measurements.extend( ['QCD_shape'] )
     all_measurements.extend( rate_changing_systematics )
 
     print 'Performing unfolding for variable', variable
@@ -493,15 +493,24 @@ if __name__ == '__main__':
           if k_value_combined < 2 : k_value_combined = 2
 
         # read fit results from JSON
-        electron_file = path_to_JSON + '/fit_results/' + category + '/fit_results_electron_' + met_type + '.txt'
-        muon_file = path_to_JSON + '/fit_results/' + category + '/fit_results_muon_' + met_type + '.txt'
-        combined_file = path_to_JSON + '/fit_results/' + category + '/fit_results_combined_' + met_type + '.txt'
+#         electron_file = path_to_JSON + '/fit_results/' + category + '/fit_results_electron_' + met_type + '.txt'
+#         muon_file = path_to_JSON + '/fit_results/' + category + '/fit_results_muon_' + met_type + '.txt'
+#         combined_file = path_to_JSON + '/fit_results/' + category + '/fit_results_combined_' + met_type + '.txt'
+        electron_file = path_to_JSON + '/' + category + '/normalisation_electron_' + met_type + '.txt'
+        muon_file = path_to_JSON + '/' + category + '/normalisation_electron_' + met_type + '.txt'
+        combined_file = path_to_JSON + '/' + category + '/normalisation_electron_' + met_type + '.txt'
+
+
 
         # don't change fit input for ttbar generator/theory systematics and PDF weights
         if category in ttbar_generator_systematics or category in ttbar_theory_systematics or category in pdf_uncertainties or category in ttbar_mass_systematics or category in kValue_systematics:
-            electron_file = path_to_JSON + '/fit_results/central/fit_results_electron_' + met_type + '.txt'
-            muon_file = path_to_JSON + '/fit_results/central/fit_results_muon_' + met_type + '.txt'
-            combined_file = path_to_JSON + '/fit_results/central/fit_results_combined_' + met_type + '.txt'
+#             electron_file = path_to_JSON + '/fit_results/central/fit_results_electron_' + met_type + '.txt'
+#             muon_file = path_to_JSON + '/fit_results/central/fit_results_muon_' + met_type + '.txt'
+#             combined_file = path_to_JSON + '/fit_results/central/fit_results_combined_' + met_type + '.txt'
+            electron_file = path_to_JSON + '/central/normalisation_electron_' + met_type + '.txt'
+            muon_file = path_to_JSON + '/central/normalisation_electron_' + met_type + '.txt'
+            combined_file = path_to_JSON + '/central/normalisation_electron_' + met_type + '.txt'
+
         
         fit_results_electron = read_data_from_JSON( electron_file )
         fit_results_muon = read_data_from_JSON( muon_file )

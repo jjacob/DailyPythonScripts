@@ -29,3 +29,6 @@ done
 
 wait;
 echo "All done! Time to run x_02_all_vars."
+
+
+#python src/cross_section_measurement/01b_get_ttjet_normalisation.py -v MET -c 7 &> logs/01_MET_get_normalisation_7TeV.log &

@@ -66,18 +66,18 @@ class XSectionConfig():
 
         # general
         self.met_systematics_suffixes = [
-                                         "ElectronEnUp",
-                                         "ElectronEnDown",
-                                         "MuonEnUp",
-                                         "MuonEnDown",
-                                         "TauEnUp",
-                                         "TauEnDown",
-                                         "JetResUp",
-                                         "JetResDown",
-                                         "JetEnUp",
-                                         "JetEnDown",
-                                         "UnclusteredEnUp",
-                                         "UnclusteredEnDown"
+#                                          "ElectronEnUp",
+#                                          "ElectronEnDown",
+#                                          "MuonEnUp",
+#                                          "MuonEnDown",
+#                                          "TauEnUp",
+#                                          "TauEnDown",
+#                                          "JetResUp",
+#                                          "JetResDown",
+#                                          "JetEnUp",
+#                                          "JetEnDown",
+#                                          "UnclusteredEnUp",
+#                                          "UnclusteredEnDown"
                                         ]
 
         self.analysis_types = {
@@ -143,19 +143,19 @@ class XSectionConfig():
 
         self.categories_and_prefixes = {
                  'central':'',
-                 'Electron_down':'_minusElectron',
-                 'Electron_up':'_plusElectron',
-                 'Muon_down':'_minusMuon',
-                 'Muon_up':'_plusMuon',
-                 'BJet_down':'_minusBJet',
-                 'BJet_up':'_plusBjet',
-                 'JES_down':'_minusJES',
-                 'JES_up':'_plusJES',
-                 'JER_down':'_minusJER',
-                 'JER_up':'_plusJER',
-                 'LightJet_down':'_minusLightJet',
-                 'LightJet_up':'_plusLightJet',
-                 }
+#                  'Electron_down':'_minusElectron',
+#                  'Electron_up':'_plusElectron',
+#                  'Muon_down':'_minusMuon',
+#                  'Muon_up':'_plusMuon',
+#                  'BJet_down':'_minusBJet',
+#                  'BJet_up':'_plusBjet',
+#                  'JES_down':'_minusJES',
+#                  'JES_up':'_plusJES',
+#                  'JER_down':'_minusJER',
+#                  'JER_up':'_plusJER',
+#                  'LightJet_down':'_minusLightJet',
+#                  'LightJet_up':'_plusLightJet',
+                }
 
         # now fill in the centre of mass dependent values
         # this position is crucial
@@ -164,8 +164,10 @@ class XSectionConfig():
         if self.centre_of_mass_energy == 8:
             self.__fill_defaults_8TeV__()
 
-        self.generator_systematics = [ 'matchingup', 'matchingdown', 'scaleup', 'scaledown' ]
-        self.topMass_systematics = [ 'TTJets_massup', 'TTJets_massdown']
+#         self.generator_systematics = [ 'matchingup', 'matchingdown', 'scaleup', 'scaledown' ]
+#         self.topMass_systematics = [ 'TTJets_massup', 'TTJets_massdown']
+        self.generator_systematics = []
+        self.topMass_systematics = []
         self.topMasses = [169.5, 172.5, 173.5]
         self.topMassUncertainty = 1.0 # GeV from https://twiki.cern.ch/twiki/bin/view/LHCPhysics/TtbarNNLO
         self.central_general_template = path_to_files + 'central/%s' + middle + '.root'
@@ -185,8 +187,8 @@ class XSectionConfig():
 
         self.data_muon_category_templates = {
                                     'central': self.data_file_muon,
-                                    'JES_up': path_to_files + 'JES_up/SingleMu' + middle + self.categories_and_prefixes['JES_up'] + '.root',
-                                    'JES_down': path_to_files + 'JES_down/SingleMu' + middle + self.categories_and_prefixes['JES_down'] + '.root'
+#                                     'JES_up': path_to_files + 'JES_up/SingleMu' + middle + self.categories_and_prefixes['JES_up'] + '.root',
+#                                     'JES_down': path_to_files + 'JES_down/SingleMu' + middle + self.categories_and_prefixes['JES_down'] + '.root'
                                     }
 
         self.unfolding_madgraph_raw = path_to_unfolding_histograms + 'unfolding_TTJets_%dTeV.root' % self.centre_of_mass_energy
@@ -295,9 +297,9 @@ class XSectionConfig():
 
         self.data_file_electron = path_to_files + 'central/ElectronHad' + middle + '.root'
         self.rate_changing_systematics = {
-                        'luminosity': 0.022,  # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupSystematicErrors
-                        'SingleTop_cross_section': 0.3,
-                        'TTJet_cross_section': 0.15
+                        'luminosity': 0.022  # https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupSystematicErrors
+#                         'SingleTop_cross_section': 0.3,
+#                         'TTJet_cross_section': 0.15
                          }
 
         # optimal regularisation parameters
@@ -325,14 +327,14 @@ class XSectionConfig():
                    'WPT' : 0
                    }
 
-        self.categories_and_prefixes['PU_down'] = '_PU_64600mb'
-        self.categories_and_prefixes['PU_up'] = '_PU_71400mb'
+#         self.categories_and_prefixes['PU_down'] = '_PU_64600mb'
+#         self.categories_and_prefixes['PU_up'] = '_PU_71400mb'
 
         self.special_muon_histogram = 'etaAbs_ge2j_data'
 
         self.data_electron_category_templates = {'central': self.data_file_electron,
-                                    'JES_up': path_to_files + 'JES_up/ElectronHad' + middle + self.categories_and_prefixes['JES_up'] + '.root',
-                                    'JES_down': path_to_files + 'JES_down/ElectronHad' + middle + self.categories_and_prefixes['JES_down'] + '.root'
+#                                     'JES_up': path_to_files + 'JES_up/ElectronHad' + middle + self.categories_and_prefixes['JES_up'] + '.root',
+#                                     'JES_down': path_to_files + 'JES_down/ElectronHad' + middle + self.categories_and_prefixes['JES_down'] + '.root'
                                     }
 
     def __fill_defaults_8TeV__( self ):

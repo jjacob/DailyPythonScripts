@@ -107,7 +107,8 @@ class TTJetNormalisation:
             data_file = measurement_config.data_file_muon
             qcd_mc_file = measurement_config.muon_QCD_MC_file
 
-        SingleTop_file = measurement_config.SingleTop_file
+#         SingleTop_file = measurement_config.SingleTop_file
+        SingleTop_file = measurement_config.SingleTop_category_templates[self.category]
         TTJet_file = measurement_config.ttbar_category_templates[self.category]
         VJets_file = measurement_config.VJets_category_templates[self.category]
 
@@ -177,6 +178,41 @@ class TTJetNormalisation:
 
     @mylog.trace()
     def scale_histograms( self, histograms ):
+        # scale rate-changing systematics
+        variations = ['+', '-']
+        print "histograms = ", histograms
+        print "measurement_config.rate_changing_systematics = ", measurement_config.rate_changing_systematics
+        for systematic, shift in measurement_config.rate_changing_systematics.iteritems():
+            if options.test:
+                continue
+
+            for variation in variations:
+                if variation == '+':
+                    factor = 1.0 + shift
+                elif variation == '-':
+                    factor = 1.0 - shift
+
+                self.category = systematic + variation
+                print "self.category = ", self.category
+
+                scale_factors = {}
+                scale_factors[systematic + variation] = factor
+                if systematic == 'TTJet_cross_section':
+                    print "TTJet cross section"
+                    histograms['TTJet'].Scale(factor)
+                elif systematic == 'SingleTop_cross_section':
+                    print "SingleTop cross section"
+                    histograms['SingleTop'].Scale(factor)
+                elif systematic == "luminosity":
+                    print "luminosity"
+                    for histogram in histograms:
+                        print "histogram = ", histogram
+                        if histogram == "data":
+                            continue
+                        histograms[histogram].Scale(factor)
+                print "histograms = ", histograms
+        #reset category to "central"
+        self.category == "central"
         return histograms
 
     @mylog.trace()
@@ -185,6 +221,7 @@ class TTJetNormalisation:
             self.calculate_normalisation()
 
         folder_template = '{path}/normalisation/{method}/{CoM}TeV/{variable}/{category}/'
+        print "self.category = ", self.category
         inputs = {
               'path': output_path,
               'CoM': self.config.centre_of_mass_energy,
@@ -242,10 +279,11 @@ def parse_options():
 @mylog.trace()
 def main():
     # for each measurement
+    print "category = ", category
     norm = TTJetNormalisation( 
                               config = measurement_config,
                               variable = variable,
-                              category = 'central',
+                              category = category, #'central',
                               channel = 'electron',
                               method = TTJetNormalisation.BACKGROUND_SUBTRACTION,
                               )
@@ -270,7 +308,7 @@ if __name__ == '__main__':
 #     ttbar_theory_systematic_prefix = measurement_config.ttbar_theory_systematic_prefix
 #     vjets_theory_systematic_prefix = measurement_config.vjets_theory_systematic_prefix
 #     generator_systematics = measurement_config.generator_systematics
-#     categories_and_prefixes = measurement_config.categories_and_prefixes
+    categories_and_prefixes = measurement_config.categories_and_prefixes
 #     met_systematics_suffixes = measurement_config.met_systematics_suffixes
 #     analysis_type = measurement_config.analysis_types
 #     run_just_central = options.closure_test or options.test
@@ -284,5 +322,9 @@ if __name__ == '__main__':
     if options.closure_test:
         output_path += '/closure_test/'
         output_path += options.closure_test_type + '/'
-    
-    main()
+
+    print "categories_and_prefixes = ", categories_and_prefixes
+    for category in categories_and_prefixes:
+        category = category
+        print "category = ", category
+        main()
