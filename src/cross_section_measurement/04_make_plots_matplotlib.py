@@ -441,7 +441,7 @@ def make_plots( histograms, category, output_folder, histname, show_ratio = True
     data_handle = handles[data_label_index]
     labels.remove( 'data' )
     handles.remove( data_handle )
-    labels.insert( 0, 'unfolded data' )
+    labels.insert( 0, 'Unfolded data' )
     handles.insert( 0, data_handle )
     
     new_handles, new_labels = [], []
@@ -481,9 +481,10 @@ def make_plots( histograms, category, output_folder, histname, show_ratio = True
         ax1.yaxis.set_minor_locator( MultipleLocator( 0.1 ) )
 
         plt.xlabel( '$%s$ [GeV]' % variables_latex[variable], CMS.x_axis_title )
+        ax1.xaxis.labelpad = 20
         plt.tick_params( **CMS.axis_label_major )
         plt.tick_params( **CMS.axis_label_minor ) 
-        plt.ylabel( '$\\frac{\\textrm{pred.}}{\\textrm{data}}$', CMS.y_axis_title )
+        plt.ylabel( '$\\frac{\\mathrm{pred.}}{\\mathrm{data}}$', CMS.y_axis_title )
         ax1.yaxis.set_label_coords(-0.115, 0.8)
         #draw a horizontal line at y=1 for data
         plt.axhline(y = 1, color = 'black', linewidth = 2)
@@ -741,7 +742,7 @@ if __name__ == '__main__':
             histograms_normalised_xsection_different_generators, histograms_normalised_xsection_systematics_shifts = read_xsection_measurement_results( category, channel )
     
             make_plots( histograms_normalised_xsection_different_generators, category, output_folder, 'normalised_xsection_' + channel + '_different_generators' )
-            # make_plots( histograms_normalised_xsection_systematics_shifts, category, output_folder, 'normalised_xsection_' + channel + '_systematics_shifts' )
+            make_plots( histograms_normalised_xsection_systematics_shifts, category, output_folder, 'normalised_xsection_' + channel + '_systematics_shifts' )
 
             del histograms_normalised_xsection_different_generators, histograms_normalised_xsection_systematics_shifts
     
