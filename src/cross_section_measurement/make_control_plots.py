@@ -219,7 +219,7 @@ def make_plot( channel, x_axis_title, y_axis_title,
 
     if normalise_to_fit:
         histogram_properties.mc_error = get_normalisation_error( normalisation )
-        histogram_properties.mc_errors_label = 'fit uncertainty'
+        histogram_properties.mc_errors_label = 'Fit uncertainty'
     else:
         histogram_properties.mc_error = mc_uncertainty
         histogram_properties.mc_errors_label = 'MC unc.'
@@ -307,22 +307,22 @@ if __name__ == '__main__':
     # comment out plots you don't want
     include_plots = [
                         'eta',
-                        'pT',
+                        # 'pT',
                         'MET',
-                        'MET log',
-                        'MET phi',
+                        # 'MET log',
+                        # 'MET phi',
                         'HT',
                         'ST',
                         'WPT',
-                        'MT',
+                        # 'MT',
                         'M3',
                         'angle_bl',
-                        'bjet invariant mass',
-                        'b-tag multiplicity',
-                        'b-tag multiplicity reweighted',
-                        'jet multiplicity',
-                        'n vertex',
-                        'n vertex reweighted',
+                        # 'bjet invariant mass',
+                        # 'b-tag multiplicity',
+                        # 'b-tag multiplicity reweighted',
+                        # 'jet multiplicity',
+                        # 'n vertex',
+                        # 'n vertex reweighted',
                         ]
     additional_qcd_plots = [
                             'eta in MET bins',
@@ -624,12 +624,12 @@ if __name__ == '__main__':
         tmp = 'TTbar_plus_X_analysis/EPlusJets/Ref selection/Binned_MT_Analysis/MT_with_patType1CorrectedPFMet_bin_%s/angle_bl_' + b_tag_bin
         regions = [tmp % bin_i for bin_i in variable_bins_ROOT['MT']]
         make_plot( 'electron',
-                  x_axis_title = fit_variables_latex['angle_bl'],
+                  x_axis_title = fit_variables_latex['angle_bl'] + ' [radians]',
                   y_axis_title = 'Events/(0.2)',
                   signal_region = regions,
                   qcd_data_region_btag = '1btag',
                   name_prefix = 'EPlusJets_angle_bl_',
-                  x_limits = [0, 4],
+                  x_limits = [0, 3.2],
                   rebin = 2,
                   legend_location = ( 0.95, 0.78 ),
                   cms_logo_location = 'right',
@@ -642,7 +642,7 @@ if __name__ == '__main__':
                   signal_region = regions,
                   qcd_data_region_btag = '1btag',
                   name_prefix = 'MuPlusJets_angle_bl_',
-                  x_limits = [0, 4],
+                  x_limits = [0, 3.2],
                   rebin = 2,
                   legend_location = ( 0.95, 0.78 ),
                   cms_logo_location = 'right',
