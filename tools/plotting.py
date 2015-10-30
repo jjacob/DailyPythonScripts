@@ -578,6 +578,7 @@ def set_labels( plt, histogram_properties, show_x_label = True,
     if show_x_label:
         plt.xlabel( histogram_properties.x_axis_title, CMS.x_axis_title )
     plt.ylabel( histogram_properties.y_axis_title, CMS.y_axis_title )
+
     plt.tick_params( **CMS.axis_label_major )
     plt.tick_params( **CMS.axis_label_minor )
     if show_title:
@@ -585,6 +586,8 @@ def set_labels( plt, histogram_properties, show_x_label = True,
         
     if not axes:
         return
+    axes.xaxis.labelpad = 20
+
     # CMS text
     # note: fontweight/weight does not change anything as we use Latex text!!!
     logo_location = (0.05, 0.98)
@@ -605,7 +608,7 @@ def set_labels( plt, histogram_properties, show_x_label = True,
                  verticalalignment='top',horizontalalignment=loc)
     # channel text
     axes.text(additional_location[0], additional_location[1], 
-              r"\emph{%s}" %histogram_properties.additional_text, 
+              r"%s" %histogram_properties.additional_text, 
               transform=axes.transAxes, fontsize=40, verticalalignment='top',
               horizontalalignment='right')
     
