@@ -466,7 +466,7 @@ def make_plots( histograms, category, output_folder, histname, show_ratio = True
     plt.text(0.05, 0.98, r"\textbf{CMS}", transform=axes.transAxes, fontsize=42,
         verticalalignment='top',horizontalalignment='left')
     # channel text     plt.text(0.95, 0.98
-    axes.text(0.95, 0.98, r"\emph{%s}" %channel_label, transform=axes.transAxes, fontsize=42,
+    axes.text(0.95, 0.98, r"%s" %channel_label, transform=axes.transAxes, fontsize=42,
         verticalalignment='top',horizontalalignment='right')
 
     if show_ratio:
@@ -515,13 +515,11 @@ def make_plots( histograms, category, output_folder, histname, show_ratio = True
         rplt.fill_between( stat_upper, stat_lower, ax1, color = '0.75',
                            alpha = 0.5 )
         # legend for ratio plot
-        p_stat = mpatches.Patch(facecolor='0.75', label='Stat.',alpha = 0.5, edgecolor='black' )
-        p_stat_and_syst = mpatches.Patch(facecolor='yellow', label=r'Stat. $\oplus$ Syst.', alpha = 0.5, edgecolor='black' )
-        l1 = ax1.legend(handles = [p_stat], loc = 'upper left',
-                     frameon = False, prop = {'size':26})
-        
-        ax1.legend(handles = [p_stat_and_syst], loc = 'lower left',
-                     frameon = False, prop = {'size':26})
+        p_stat = mpatches.Patch(facecolor='0.75', label='Stat.', edgecolor='black' )
+        p_stat_and_syst = mpatches.Patch(facecolor='yellow', label=r'Stat. $\oplus$ Syst.', edgecolor='black' )
+
+        l1 = ax1.legend(handles = [p_stat, p_stat_and_syst], loc = 'upper left',
+                     frameon = False, prop = {'size':26}, ncol = 2)
         ax1.add_artist(l1)
         
         if variable == 'MET':
@@ -726,14 +724,14 @@ if __name__ == '__main__':
                 if met_type == 'PFMETJetEnDown':
                     met_type = 'patPFMetJetEnDown'
             
-            if not channel == 'combined' and options.additional_plots:
-                #Don't make additional plots for e.g. generator systematics, mass systematics, k value systematics and pdf systematics because they are now done \
-                #in the unfolding process with BLT unfolding files.
-                if category in ttbar_generator_systematics or category in ttbar_mass_systematics or category in kValue_systematics or category in pdf_uncertainties:
-                    continue
-                fit_templates, fit_results = read_fit_templates_and_results_as_histograms( category, channel )
-                make_template_plots( fit_templates, category, channel )
-                plot_fit_results( fit_results, category, channel )
+            # if not channel == 'combined' and options.additional_plots:
+            #     #Don't make additional plots for e.g. generator systematics, mass systematics, k value systematics and pdf systematics because they are now done \
+            #     #in the unfolding process with BLT unfolding files.
+            #     if category in ttbar_generator_systematics or category in ttbar_mass_systematics or category in kValue_systematics or category in pdf_uncertainties:
+            #         continue
+            #     fit_templates, fit_results = read_fit_templates_and_results_as_histograms( category, channel )
+            #     make_template_plots( fit_templates, category, channel )
+            #     plot_fit_results( fit_results, category, channel )
 
             # change back to original MET type
             met_type = translate_options[options.metType]
@@ -743,7 +741,7 @@ if __name__ == '__main__':
             histograms_normalised_xsection_different_generators, histograms_normalised_xsection_systematics_shifts = read_xsection_measurement_results( category, channel )
     
             make_plots( histograms_normalised_xsection_different_generators, category, output_folder, 'normalised_xsection_' + channel + '_different_generators' )
-            make_plots( histograms_normalised_xsection_systematics_shifts, category, output_folder, 'normalised_xsection_' + channel + '_systematics_shifts' )
+            # make_plots( histograms_normalised_xsection_systematics_shifts, category, output_folder, 'normalised_xsection_' + channel + '_systematics_shifts' )
 
             del histograms_normalised_xsection_different_generators, histograms_normalised_xsection_systematics_shifts
     
