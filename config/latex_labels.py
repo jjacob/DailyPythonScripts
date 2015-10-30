@@ -3,11 +3,11 @@ Created on 4 May 2013
 
 @author: kreczko
 '''
-b_tag_bins_latex = {'0btag':'0 b-tags', '0orMoreBtag':'$\geq$ 0 b-tags', '1btag':'1 b-tag',
-                    '1orMoreBtag':'$\geq$ 1 b-tags',
-                    '2btags':'2 b-tags', '2orMoreBtags':'$\geq$ 2 b-tags',
-                    '3btags':'3 b-tags', '3orMoreBtags':'$\geq$ 3 b-tags',
-                    '4orMoreBtags':'$\geq$ 4 b-tags'}
+b_tag_bins_latex = {'0btag':'0 b tags', '0orMoreBtag':'$\geq$ 0 b tags', '1btag':'1 b tag',
+                    '1orMoreBtag':'$\geq$ 1 b tags',
+                    '2btags':'2 b tags', '2orMoreBtags':'$\geq$ 2 b tags',
+                    '3btags':'3 b tags', '3orMoreBtags':'$\geq$ 3 b tags',
+                    '4orMoreBtags':'$\geq$ 4 b tags'}
     
 variables_latex = {
                        'MET': 'E_{\mathrm{T}}^{\mathrm{miss}}',
@@ -16,35 +16,37 @@ variables_latex = {
                        'MT': 'M^{\mathrm{W}}_{\mathrm{T}}',
                        'WPT': 'p^\mathrm{W}_{\mathrm{T}}'}
 
+ttBarLatex = '$\mathrm{t}\\bar{\mathrm{t}}$'
+
 measurements_latex = {'unfolded': 'unfolded',
                         'measured': 'measured',
-                        'MADGRAPH': '$t\\bar{t}$ (MADGRAPH+Pythia)',
-                        'MADGRAPH_ptreweight': '$t\\bar{t}$ (MADGRAPH+$p_\mathrm{T}^\mathrm{reweight}$)',
-                        'MCATNLO': '$t\\bar{t}$ (MC@NLO+Herwig)',
-                        'POWHEG_PYTHIA': '$t\\bar{t}$ (POWHEG+Pythia)',
-                        'POWHEG_HERWIG': '$t\\bar{t}$ (POWHEG+Herwig)',
-                        'matchingdown': '$t\\bar{t}$ (matching down)',
-                        'matchingup': '$t\\bar{t}$ (matching up)',
-                        'scaledown': '$t\\bar{t}$ ($Q^{2}$ down)',
-                        'scaleup': '$t\\bar{t}$ ($Q^{2}$ up)',
-                        'TTJets_matchingdown': '$t\\bar{t}$ (matching down)',
-                        'TTJets_matchingup': '$t\\bar{t}$ (matching up)',
-                        'TTJets_scaledown': '$t\\bar{t}$ ($Q^{2}$ down)',
-                        'TTJets_scaleup': '$t\\bar{t}$ ($Q^{2}$ up)',
-                        'TTJets_massdown': '$t\\bar{t}$ (top mass down)',
-                        'TTJets_massup': '$t\\bar{t}$ (top mass up)',
+                        'MADGRAPH':  'Madgraph Pythia',
+                        'MADGRAPH_ptreweight': 'Madgraph+$p_\mathrm{T}$ reweighting',
+                        'MCATNLO': 'MC@NLO Herwig',
+                        'POWHEG_PYTHIA': 'Powheg Pythia',
+                        'POWHEG_HERWIG': 'Powheg Herwig',
+                        'matchingdown':  'Matching down',
+                        'matchingup':  'Matching up',
+                        'scaledown':  '$Q^{2}$ down',
+                        'scaleup':  '$Q^{2}$ up',
+                        'TTJets_matchingdown':  'Matching down',
+                        'TTJets_matchingup':  'Matching up',
+                        'TTJets_scaledown':  '$Q^{2}$ down',
+                        'TTJets_scaleup':  '$Q^{2}$ up',
+                        'TTJets_massdown':  'Top mass down',
+                        'TTJets_massup':  'Top mass up',
                         'VJets_matchingdown': 'V+jets (matching down)',
                         'VJets_matchingup': 'V+jets (matching up)',
                         'VJets_scaledown': 'V+jets ($Q^{2}$ down)',
                         'VJets_scaleup': 'V+jets ($Q^{2}$ up)',
-                        'BJet_down':'b-tagging efficiency $-1\sigma$',
-                        'BJet_up':'b-tagging efficiency $+1\sigma$',
+                        'BJet_down':'b tagging efficiency $-1\sigma$',
+                        'BJet_up':'b tagging efficiency $+1\sigma$',
                         'JES_down':'Jet energy scale $-1\sigma$',
                         'JES_up':'Jet energy scale $+1\sigma$',
                         'JER_down':'Jet energy resolution $-1\sigma$',
                         'JER_up':'Jet energy resolution $+1\sigma$',
-                        'LightJet_down':'b-tagging mis-tag rate $-1\sigma$',
-                        'LightJet_up':'b-tagging mis-tag rate $+1\sigma$',
+                        'LightJet_down':'b tagging mis-tag rate $-1\sigma$',
+                        'LightJet_up':'b tagging mis-tag rate $+1\sigma$',
                         'PU_down':'Pile-up $-1\sigma$',
                         'PU_up':'Pile-up $+1\sigma$',
                         'central':'central',
@@ -55,8 +57,8 @@ measurements_latex = {'unfolded': 'unfolded',
                         'QCD_shape' : 'QCD shape uncertainty',
                         'luminosity+' : 'Luminosity $+1\sigma$',
                         'luminosity-' : 'Luminosity $-1\sigma$',
-                        'TTJet_cross_section+' : '$t\\bar{t}$ cross section $+1\sigma$',
-                        'TTJet_cross_section-' : '$t\\bar{t}$ cross section $-1\sigma$',
+                        'TTJet_cross_section+' : ttBarLatex + ' cross section $+1\sigma$',
+                        'TTJet_cross_section-' : ttBarLatex + ' cross section $-1\sigma$',
                         'SingleTop_cross_section+' : 'Single top cross section $+1\sigma$',
                         'SingleTop_cross_section-' : 'Single top cross section $-1\sigma$',
                         'V+Jets_cross_section+': 'V+jets cross section \ensuremath{+1\sigma}',
@@ -87,18 +89,18 @@ met_systematics_latex = {
 }
 
 samples_latex = {
-                 'data':'data',
+                 'data':'Data',
                  'QCD':'QCD',
                  'WJets':'W $\\rightarrow \ell\\nu$',
                  'ZJets':'Z/$\gamma^*$ + jets',
-                 'TTJet':'$\mathrm{t}\\bar{\mathrm{t}}$',
-                 'SingleTop':'Single-Top'  ,
+                 'TTJet':ttBarLatex,
+                 'SingleTop':'Single Top'  ,
                  'V+Jets' : 'W/Z + jets'               
                  }
 
 fit_variables_latex = {
                        'absolute_eta' : r'lepton $|\eta|$',
-                       'M3' : r'$M3$',
+                       'M3' : r'$M_3$',
                        'M_bl' : r'$M(b,l)$',
                        'angle_bl' : r'$\alpha$',
                        }
