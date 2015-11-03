@@ -411,30 +411,46 @@ def make_plots( histograms, category, output_folder, histname, show_ratio = True
     if show_before_unfolding:
         rplt.errorbar( hist_measured, axes = axes, label = 'data (before unfolding)', xerr = None, zorder = len( histograms ) )
     
+    dashes = {}
     for key, hist in sorted( histograms.iteritems() ):
+        zorder = sorted( histograms, reverse = False ).index( key )
+        if key == 'MADGRAPH' and zorder != len(histograms) - 3:
+            zorder = len(histograms) - 3
+        elif key != 'MADGRAPH' and not 'unfolded' in key:
+            while zorder >= len(histograms) - 3:
+                zorder = zorder - 1 
+
         if not 'unfolded' in key and not 'measured' in key:
             hist.linewidth = 4
+            linestyle = None
             # setting colours
             if 'POWHEG_PYTHIA' in key or 'matchingdown' in key:
-                hist.linestyle = 'longdashdot'
+                dashes[key] = [25,5,5,5,5,5,5,5]
                 hist.SetLineColor( kBlue )
             elif 'POWHEG_HERWIG' in key or 'scaledown' in key:
-                hist.linestyle = 'dashed'
+                dashes[key] = [5,5]
                 hist.SetLineColor( kGreen )
             elif 'MADGRAPH_ptreweight' in key:
-                hist.linestyle = 'dashed'
-                hist.SetLineColor( kBlack )
+                dashes[key] = [20,5]
+                hist.SetLineColor( kRed + 3 )
             elif 'MADGRAPH' in key:
-                hist.linestyle = 'solid'
+                linestyle = 'solid'
+                dashes[key] = None
                 hist.SetLineColor( kRed + 1 )
             elif 'matchingup' in key:
-                hist.linestyle = 'verylongdashdot'
-                hist.linecolor = 'orange'
+                dashes[key] = [25,5,5,5,25,5,5,5]
+                hist.SetLineColor( kMagenta + 1 )
             elif 'MCATNLO'  in key or 'scaleup' in key:
-                hist.linestyle = 'dotted'
-                hist.SetLineColor( kMagenta + 3 )
-            rplt.hist( hist, axes = axes, label = measurements_latex[key], zorder = sorted( histograms, reverse = True ).index( key ) )
-            
+                dashes[key] = [5,5,10,5]
+                hist.linecolor = 'orange'
+
+            if linestyle != None:
+                hist.linestyle = linestyle
+            line, h = rplt.hist( hist, axes = axes, label = measurements_latex[key], zorder = zorder )
+
+            if dashes[key] != None:
+                line.set_dashes(dashes[key])
+                h.set_dashes(dashes[key])
     handles, labels = axes.get_legend_handles_labels()
     # making data first in the list
     data_label_index = labels.index( 'data' )
@@ -493,7 +509,9 @@ def make_plots( histograms, category, output_folder, histname, show_ratio = True
             if not 'unfolded' in key and not 'measured' in key:
                 ratio = hist.Clone()
                 ratio.Divide( hist_data ) #divide by data
-                rplt.hist( ratio, axes = ax1, label = 'do_not_show' )
+                line, h = rplt.hist( ratio, axes = ax1, label = 'do_not_show' )
+                if dashes[key] != None:
+                    h.set_dashes(dashes[key])
 
         stat_lower = hist_data.Clone()
         stat_upper = hist_data.Clone()
