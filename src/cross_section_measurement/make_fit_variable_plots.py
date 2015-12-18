@@ -28,7 +28,7 @@ muon_fit_variables.append( 'muon_absolute_eta' )
 fit_variable_properties = {
                        'M3': {'min':0, 'max':1000, 'rebin':5, 'x-title': 'M3 [GeV]', 'y-title': 'Events/25 GeV'},
                        'M_bl': {'min':0, 'max':400, 'rebin':2, 'x-title': 'M(b,l) [GeV]', 'y-title': 'Events/10 GeV'},
-                       'angle_bl': {'min':0, 'max':3.5, 'rebin':2, 'x-title': 'angle(b,l)', 'y-title': 'Events/(0.2)'},
+                       'angle_bl': {'min':0, 'max':3.5, 'rebin':2, 'x-title': '\alpha', 'y-title': 'Events/(0.2)'},
                        'electron_absolute_eta': {'min':0, 'max':2.6, 'rebin':2, 'x-title': '$\left|\eta(e)\\right|$', 'y-title': 'Events/(0.2)'},
                        'muon_absolute_eta': {'min':0, 'max':2.6, 'rebin':2, 'x-title': '$\left|\eta(\mu)\\right|$', 'y-title': 'Events/(0.2)'},
                        }
