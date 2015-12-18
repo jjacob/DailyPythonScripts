@@ -10,11 +10,12 @@ b_tag_bins_latex = {'0btag':'0 b tags', '0orMoreBtag':'$\geq$ 0 b tags', '1btag'
                     '4orMoreBtags':'$\geq$ 4 b tags'}
     
 variables_latex = {
-                       'MET': 'E_{\mathrm{T}}^{\mathrm{miss}}',
-                       'HT': 'H_{\mathrm{T}}',
-                       'ST': 'S_{\mathrm{T}}',
-                       'MT': 'M^{\mathrm{W}}_{\mathrm{T}}',
-                       'WPT': 'p^\mathrm{W}_{\mathrm{T}}'}
+    'MET': '\ensuremath{E_{\mathrm{T}}^{\mathrm{miss}}}',
+    'HT': '\ensuremath{H_{\mathrm{T}}}',
+    'ST': '\ensuremath{S_{\mathrm{T}}}',
+    'MT': '\ensuremath{M^{\mathrm{W}}_{\mathrm{T}}}',
+    'WPT': '\ensuremath{p^\mathrm{W}_{\mathrm{T}}}'
+    }
 
 ttBarLatex = '$\mathrm{t}\\bar{\mathrm{t}}$'
 
@@ -23,8 +24,10 @@ measurements_latex = {'unfolded': 'unfolded',
                         'MADGRAPH':  'Madgraph Pythia',
                         'MADGRAPH_ptreweight': 'Madgraph+$p_\mathrm{T}$ reweighting',
                         'MCATNLO': 'MC@NLO Herwig',
-                        'POWHEG_PYTHIA': 'Powheg Pythia',
-                        'POWHEG_HERWIG': 'Powheg Herwig',
+                        'powheg_v1_pythia': 'Powheg (v1) Pythia6',
+                        'powheg_v2_pythia': 'Powheg (v2) Pythia6',
+                        'powheg_v1_herwig': 'Powheg (v1) Herwig',
+                        'powheg_v2_herwig': 'Powheg (v2) Herwig++',
                         'matchingdown':  'Matching down',
                         'matchingup':  'Matching up',
                         'scaledown':  '$Q^{2}$ down',
