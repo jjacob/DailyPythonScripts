@@ -73,8 +73,8 @@ def compare_shapes( channel, x_axis_title, y_axis_title,
     histogram_properties = Histogram_properties()
     histogram_properties.name = name_prefix + b_tag_bin
     histogram_properties.title = title
-    histogram_properties.x_axis_title = y_axis_title
-    histogram_properties.y_axis_title = x_axis_title
+    histogram_properties.x_axis_title = x_axis_title
+    histogram_properties.y_axis_title = y_axis_title
     histogram_properties.x_limits = x_limits
     histogram_properties.y_limits = y_limits
     histogram_properties.legend_location = legend_location
