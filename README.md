@@ -16,11 +16,11 @@ cd DailyPythonScripts
 # get submodules:
 git submodule init && git submodule update
 
-# setup run:
-./setup.sh
+# setup environment (using virtualenv for python):
+./setup_with_conda.sh
 
 # setup environment (using virtualenv for python):
-source environment.sh
+source environment_conda.sh
 
 # make sure matplotlib is up to date (should return 1.3.1 or above):
 python -c 'import matplotlib; print matplotlib.__version__'
