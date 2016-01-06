@@ -38,6 +38,7 @@ class Histogram_properties:
     ratio_y_limits = [0.7, 1.3] #[min, max]
     rebin = 1
     additional_text = ''
+    additional_location = ()
     preliminary = False
     cms_logo_location = 'left' # left|right
     ratio_y_title = 'I am the ratio'
@@ -274,6 +275,7 @@ def make_data_mc_comparison_plot( histograms = [],
     else:
         y_max = get_best_max_y(histograms_, x_limits=x_limits) * histogram_properties.y_max_scale
         axes.set_ylim( ymin = 0, ymax = y_max )
+        y_limits = [0, y_max]
     if histogram_properties.set_log_y:
         if not len( y_limits ) == 2:  # if not user set y-limits, set default
             axes.set_ylim( ymin = 1e-1 )
@@ -677,6 +679,8 @@ def set_labels( plt, histogram_properties, show_x_label = True,
         logo_location = (0.95, 0.98)
         prelim_location = (0.95, 0.92)
         additional_location = (0.95, 0.86)
+    if histogram_properties.additional_location:
+        additional_location = histogram_properties.additional_location 
         
     plt.text(logo_location[0], logo_location[1], r"\textbf{CMS}", 
              transform=axes.transAxes, fontsize=42,
@@ -688,7 +692,7 @@ def set_labels( plt, histogram_properties, show_x_label = True,
     # channel text
     axes.text(additional_location[0], additional_location[1], 
               r"%s" %histogram_properties.additional_text, 
-              transform=axes.transAxes, fontsize=40, verticalalignment='top',
+              transform=axes.transAxes, fontsize=42, verticalalignment='top',
               horizontalalignment='right')
     
 def adjust_axis_limits( axes, histogram_properties, histograms = [] ):

@@ -103,10 +103,12 @@ def make_plot( channel, x_axis_title, y_axis_title,
               y_max_scale = 1.2,
               rebin = 1,
               legend_location = ( 0.98, 0.78 ), cms_logo_location = 'right',
+              additional_location = (),
               log_y = False,
               legend_color = False,
               ratio_y_limits = [0.3, 1.7],
               normalise = False,
+              draw_vertical_line = 0,
               ):
     global output_folder, measurement_config, category, normalise_to_fit
     global preliminary, norm_variable, sum_bins, b_tag_bin, histogram_files
@@ -226,7 +228,8 @@ def make_plot( channel, x_axis_title, y_axis_title,
 
     make_data_mc_comparison_plot( histograms_to_draw, histogram_lables, histogram_colors,
                                  histogram_properties, save_folder = output_folder,
-                                 show_ratio = False, normalise = normalise,
+                                 show_ratio = False, normalise = normalise, 
+                                 draw_vertical_line = draw_vertical_line,
                                  )
     histogram_properties.name += '_with_ratio'
     loc = histogram_properties.legend_location
@@ -235,6 +238,7 @@ def make_plot( channel, x_axis_title, y_axis_title,
     make_data_mc_comparison_plot( histograms_to_draw, histogram_lables, histogram_colors,
                                  histogram_properties, save_folder = output_folder,
                                  show_ratio = True, normalise = normalise,
+                                 draw_vertical_line = draw_vertical_line,
                                  )
 
 if __name__ == '__main__':
@@ -1200,6 +1204,20 @@ if __name__ == '__main__':
                   cms_logo_location = 'right',
                   log_y = True,
                   )
+        make_plot( 'muon',
+                  x_axis_title = 'PF reliso($\mu$)',
+                  y_axis_title = 'Events/(0.1)',
+                  signal_region = 'TTbar_plus_X_analysis/MuPlusJets/QCD mu+jets PFRelIso ge3j/Muon/muon_pfIsolation_04_' + b_tag_bin,
+                  use_qcd_data_region = False,
+                  name_prefix = 'QCD_muon_pfIsolation_with_cutline_',
+                  x_limits = [0, 3],
+                  rebin = 10,
+                  legend_location = ( 0.95, 0.815 ),
+                  additional_location = (0.95, 0.90),                  
+                  cms_logo_location = 'right',
+                  log_y = True,
+                  draw_vertical_line = 0.3,
+                  )
     ###################################################
     # QCD lepton |eta|
     ###################################################
@@ -1213,7 +1231,7 @@ if __name__ == '__main__':
                   name_prefix = 'QCD_electron_AbsEta_conversion_control_region_',
                   x_limits = [0, 2.6],
                   rebin = 10,
-                  legend_location = ( 0.98, 0.78 ),
+                  legend_location = ( 0.42, 0.78 ),
                   cms_logo_location = 'right',
                   )
         make_plot( 'electron',
@@ -1247,7 +1265,7 @@ if __name__ == '__main__':
                   name_prefix = 'QCD_electron_AbsEta_conversion_control_region_',
                   x_limits = [0, 2.6],
                   rebin = 10,
-                  legend_location = ( 0.98, 0.78 ),
+                  legend_location = ( 0.42, 0.78 ),
                   cms_logo_location = 'right',
                   )
         make_plot( 'electron',
