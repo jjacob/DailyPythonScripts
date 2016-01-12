@@ -61,7 +61,9 @@ class HistSet():
 
         if plot_options.has_key( 'normalise' ):
             normalise = plot_options['normalise']
-        
+        else:
+            normalise = False
+
         if plot_type == 'shape_comparison':
             make_shape_comparison_plot( shapes = self.histograms,
                                        names = self.labels,
